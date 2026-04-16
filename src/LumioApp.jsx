@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 // ─── DESIGN TOKENS ────────────────────────────────────────────────────────────
 const css = `
@@ -465,6 +465,10 @@ export default function Lumio() {
   const [leadData, setLeadData] = useState({ name: "", email: "", phone: "" });
   const [leadSent, setLeadSent] = useState(false);
   const [donation, setDonation] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const fileInputRef = useRef(null);
 
   // Compute level-2 questions based on current profile
   const activeL2 = Q_LEVEL2_RULES.filter(r => r.condition(profile));
@@ -481,6 +485,97 @@ export default function Lumio() {
 
   const currentQ1 = Q_LEVEL1[q1Step];
   const canNextQ1 = !!profile[currentQ1?.id];
+
+  // ── VRAIE ANALYSE PDF ─────────────────────────────────────────────────────
+  const analyzeRealPDF = async (file) => {
+    setUploading(true);
+    setUploadError("");
+    try {
+      const reader = new FileReader();
+      const base64 = await new Promise((resolve, reject) => {
+        reader.onload = () => resolve(reader.result.split(",")[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      const profileSummary = Object.entries(profile)
+        .filter(([k, v]) => v)
+        .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(", ") : v}`)
+        .join(" | ");
+
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": import.meta.env.VITE_ANTHROPIC_API_KEY,
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true",
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 2000,
+          messages: [{
+            role: "user",
+            content: [
+              {
+                type: "document",
+                source: { type: "base64", media_type: "application/pdf", data: base64 }
+              },
+              {
+                type: "text",
+                text: `Tu es un expert en assurance automobile française avec 20 ans d'expérience. Analyse ce contrat d'assurance auto en tenant compte du profil client suivant : ${profileSummary}.
+
+Retourne UNIQUEMENT un objet JSON valide (sans markdown, sans backticks) avec exactement cette structure :
+{
+  "type": "type exact du contrat",
+  "compagnie": "nom de l'assureur",
+  "score": 3,
+  "resume": "résumé de 2-3 phrases claires pour un non-expert, en tenant compte du profil",
+  "garanties": ["garantie 1", "garantie 2", "garantie 3", "garantie 4"],
+  "exclusions": ["exclusion critique 1", "exclusion 2"],
+  "alertes": ["point attention 1", "point attention 2", "point attention 3"],
+  "points_forts": ["point fort 1", "point fort 2"],
+  "points_faibles": ["point faible 1", "point faible 2"],
+  "conseil": "conseil expert personnalisé en 1 phrase",
+  "gaps": [
+    {"ok": true, "title": "titre", "detail": "explication", "tip": null},
+    {"ok": false, "title": "titre lacune", "detail": "explication du risque concret", "tip": "conseil expert"},
+    {"ok": "warn", "title": "titre alerte", "detail": "explication", "tip": "conseil"}
+  ]
+}`
+              }
+            ]
+          }]
+        })
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error?.message || "Erreur API");
+      }
+
+      const data = await res.json();
+      const text = data.content[0].text.trim().replace(/```json|```/g, "").trim();
+      const result = JSON.parse(text);
+      setAnalysis({ ...result, fileName: file.name });
+      setActiveTab(0);
+      setStep("results");
+    } catch (e) {
+      setUploadError("Erreur lors de l'analyse : " + e.message + ". Vérifiez que votre clé API est valide.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type === "application/pdf") {
+      setUploadedFile(file);
+      setUploadError("");
+    } else if (file) {
+      setUploadError("Format non supporté. Veuillez déposer un fichier PDF.");
+    }
+  };
 
   const Nav = ({ back, onBack }) => (
     <div>
@@ -780,24 +875,74 @@ export default function Lumio() {
             </div>
           </div>
 
-          <div className="upload-zone">
-            <div style={{ fontSize: 36, marginBottom: 10 }}>📄</div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: "#0B1F4B", marginBottom: 6 }}>Upload de votre contrat PDF</div>
-            <div style={{ fontSize: 13, color: "#9CA3AF", marginBottom: 4 }}>Disponible sur votre site web en ligne</div>
-            <div style={{ fontSize: 11, color: "#C4BAA8" }}>L'IA lit votre contrat et le croise avec votre profil</div>
-          </div>
+          {uploadError && (
+            <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 10, padding: "12px 16px", marginBottom: 14, fontSize: 13, color: "#991B1B" }}>
+              ⚠️ {uploadError}
+            </div>
+          )}
+
+          {/* ZONE UPLOAD RÉELLE */}
+          <label htmlFor="pdf-upload" style={{ display: "block", cursor: "pointer" }}>
+            <div className="upload-zone" style={{ borderColor: uploadedFile ? "#3B82F6" : undefined, background: uploadedFile ? "#EFF6FF" : undefined }}>
+              {uploading ? (
+                <>
+                  <div style={{ fontSize: 36, marginBottom: 10 }}>⏳</div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: "#0B1F4B", marginBottom: 6 }}>Analyse en cours…</div>
+                  <div style={{ fontSize: 13, color: "#9CA3AF" }}>L'IA lit votre contrat, patientez 30 secondes</div>
+                  <div style={{ marginTop: 14, width: "60%", height: 4, background: "#E8EEFF", borderRadius: 10, margin: "14px auto 0" }}>
+                    <div style={{ height: 4, width: "70%", background: "linear-gradient(90deg,#3B82F6,#60A5FA)", borderRadius: 10, animation: "fadeUp 1s ease infinite" }}></div>
+                  </div>
+                </>
+              ) : uploadedFile ? (
+                <>
+                  <div style={{ fontSize: 36, marginBottom: 10 }}>✅</div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: "#0B1F4B", marginBottom: 4 }}>📄 {uploadedFile.name}</div>
+                  <div style={{ fontSize: 13, color: "#3B82F6", marginBottom: 6 }}>Fichier sélectionné — cliquez pour changer</div>
+                </>
+              ) : (
+                <>
+                  <div style={{ fontSize: 36, marginBottom: 10 }}>📄</div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: "#0B1F4B", marginBottom: 6 }}>Cliquez ici pour choisir votre PDF</div>
+                  <div style={{ fontSize: 13, color: "#9CA3AF", marginBottom: 10 }}>ou glissez-déposez votre contrat</div>
+                  <div style={{ display: "inline-block", background: "linear-gradient(135deg,#1D4ED8,#3B82F6)", color: "white", padding: "10px 24px", borderRadius: 10, fontSize: 14, fontWeight: 700 }}>
+                    📂 Parcourir mes fichiers
+                  </div>
+                  <div style={{ fontSize: 11, color: "#C4BAA8", marginTop: 10 }}>PDF uniquement · Contrat auto, habitation, santé…</div>
+                </>
+              )}
+            </div>
+          </label>
+          <input
+            id="pdf-upload"
+            type="file"
+            accept=".pdf,application/pdf"
+            ref={fileInputRef}
+            style={{ position: "absolute", width: 1, height: 1, opacity: 0, overflow: "hidden" }}
+            onChange={handleFileChange}
+            disabled={uploading}
+          />
+
+          {uploadedFile && !uploading && (
+            <div style={{ marginTop: 16, textAlign: "center" }}>
+              <button
+                className="btn-primary"
+                style={{ fontSize: 16, padding: "14px 36px", boxShadow: "0 4px 16px rgba(29,78,216,0.4)" }}
+                onClick={() => analyzeRealPDF(uploadedFile)}>
+                🔍 Analyser mon contrat →
+              </button>
+            </div>
+          )}
 
           {/* DEMO */}
-          <div style={{ marginTop: 16, background: "linear-gradient(135deg,#0B1F4B,#1E3A7B)", borderRadius: 16, padding: "22px", textAlign: "center" }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: "white", marginBottom: 5 }}>🎬 Mode démonstration</div>
-            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", marginBottom: 14 }}>
-              Simulez une analyse basée sur votre profil — sans avoir besoin de déposer un PDF
+          <div style={{ marginTop: 20, background: "linear-gradient(135deg,#0B1F4B,#1E3A7B)", borderRadius: 16, padding: "20px", textAlign: "center" }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "white", marginBottom: 4 }}>🎬 Pas de PDF sous la main ?</div>
+            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", marginBottom: 12 }}>
+              Testez avec une simulation basée sur votre profil
             </div>
             <button
               onClick={() => { setAnalysis(buildDemoAnalysis(profile)); setActiveTab(0); setStep("results"); }}
-              className="btn-primary"
-              style={{ boxShadow: "0 4px 16px rgba(59,130,246,0.4)" }}>
-              Voir mon analyse personnalisée →
+              style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", color: "white", padding: "9px 20px", borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+              Voir la démo →
             </button>
           </div>
         </div>
