@@ -670,7 +670,73 @@ Tous ces frais DEVRAIENT être à 0€ — c'est le standard recommandé par Lum
 - Frais de courtage/gestion annuels : devrait être 0€ (inexistants chez assureurs en direct)
 - Si des frais annexes sont présents dans le contrat = point TRÈS NÉGATIF à signaler explicitement
 
-VÉHICULES ÉLECTRIQUES — POINTS SPÉCIFIQUES À VÉRIFIER :
+CONTENU DU VÉHICULE / OBJETS TRANSPORTÉS — PLAFONDS MARCHÉ :
+Effets personnels (vêtements, sac, petits objets) : 300-800€ par sinistre (limite par objet 50-200€) | Formules confort/premium : 1 000-1 500€
+Bagages en déplacement/vacances : 500-2 000€ global (limite par objet 150-300€)
+Équipements électroniques (smartphone, tablette, ordinateur) : souvent exclus ou 150-300€ par objet — souvent non couverts si visibles
+Sièges auto/enfants : 200-500€ par siège
+Accessoires et équipements non d'origine (autoradio, GPS, jantes, attelage) : 300-1 500€ (facture + pose pro souvent exigées)
+Câbles/accessoires recharge VE : plafond dédié attendu 500-2 000€
+Objets de valeur (bijoux, montres, espèces, papiers officiels) : généralement EXCLUS
+Matériel professionnel : exclu sans option spécifique — avec option "objets pro" : 1 000-5 000€
+
+CONDITIONS DE PRISE EN CHARGE VOL CONTENU :
+- Effraction avérée (traces, vitre brisée) obligatoire
+- Objets non visibles depuis l'extérieur (dans le coffre/boîte à gants fermés)
+- Dépôt de plainte requis
+- Franchise habituelle : 50-150€ ou franchise vol du contrat
+- Exclusions : objets visibles, espèces, clés, documents officiels, animaux, absence d'effraction
+- Restrictions possibles de nuit (22h-6h) si stationnement voie publique
+
+COUVERTURE HORS EUROPE :
+Carte verte (RC) :
+- UE/EEE : toujours couverts
+- Souvent couverts (non barrés) : Andorre, Suisse, UK, Balkans, Moldavie, Turquie
+- Souvent NON couverts (assurance frontière à acheter) : Kosovo, Maroc, Tunisie, pays hors système
+- Russie/Belarus : très souvent non couverts depuis 2023
+
+Garanties dommages/vol hors Europe :
+- Souvent limitées à "Europe géographique" ou "pays carte verte non barrés"
+- Hors Europe : souvent exclu par défaut — extension territoriale ou avenant nécessaire
+- Exclusions universelles : guerre, émeutes, confiscation, sanctions/embargo
+
+Assistance hors Europe :
+- Zone standard : "Europe + pays riverains méditerranée" ou "pays carte verte non barrés"
+- Vérifier si l'assistance opère réellement au Maghreb, Turquie, Caucase
+- Durée séjour standard : 60-90 jours consécutifs (parfois 180) — au-delà : prévenir l'assureur
+
+RÉSILIATION PAR L'ASSUREUR — MOTIFS LÉGAUX :
+- À l'échéance (L113-12) : préavis 2 mois minimum
+- Non-paiement (L113-3) : garanties suspendues après 30 jours → résiliation 10 jours après si non régularisé
+- Fausse déclaration intentionnelle (L113-8) : NULLITÉ du contrat — sinistres non indemnisés
+- Inexactitudes non intentionnelles (L113-9) : réduction d'indemnité proportionnelle ou résiliation
+- Aggravation du risque non déclarée (L113-4) : réduction/refus + résiliation
+- Après sinistre (clause contractuelle) : notification dans le mois suivant le règlement
+- Inscription fichier AGIRA possible selon motif → peut compliquer une nouvelle souscription
+- Le CRM (bonus-malus) suit l'assuré — jamais remis à zéro par la résiliation
+- En cas de difficulté à se réassurer : Bureau Central de Tarification (BCT) pour RC obligatoire
+
+LOA / LLD — SPÉCIFICITÉS INDEMNISATION :
+Principe : le véhicule appartient au bailleur — l'indemnité d'assurance est versée en priorité au bailleur
+
+Reliquat (reste à payer après sinistre total/vol) :
+- LOA : solde dû = loyers restants actualisés + frais de résiliation + valeur de rachat éventuelle − valeur épave − dépôt de garantie → Reliquat = solde dû − indemnité d'assurance
+- LLD : solde dû = indemnité de résiliation anticipée (loyers restants) + frais → Reliquat = solde dû − indemnité d'assurance
+- SANS garantie GAP/protection financière : le reliquat reste à la charge du locataire — risque important
+
+Valeur résiduelle :
+- LOA : montant de l'option d'achat à l'échéance — peut entrer dans le calcul de résiliation
+- LLD : pas de valeur rachetable côté client
+
+Indemnisation en perte totale :
+- Base standard : VRADE (valeur de remplacement à dire d'expert) → souvent insuffisante pour couvrir le solde LOA/LLD
+- Avec garantie valeur à neuf ou valeur d'achat : meilleure couverture du solde
+- La franchise reste toujours à la charge du locataire
+
+Points d'attention LOA/LLD :
+- Continuer à payer les loyers jusqu'au décompte final
+- Pénalités possibles : dépassement kilométrique, frais remise en état, frais dossier résiliation
+- CONSEIL : garantie GAP/protection financière fortement recommandée pour éviter un reliquat significatif
 1. Batterie et organes HV : batterie, moteur(s), chargeur embarqué, inverter couverts pour accident/incendie/surtension/inondation — l'usure et la perte de capacité sont exclues (normal)
 2. Frais spécifiques VE : neutralisation HV, remorquage sur plateau, stockage sécurisé, dépollution après incendie — vérifier si un plafond dédié existe
 3. Câbles/chargeur/adaptateurs : vérifier si vol ou dégradation couverts (en charge publique notamment) — plafond dédié attendu entre 500€ et 2 000€
