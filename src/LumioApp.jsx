@@ -545,10 +545,38 @@ FRANCHISE CONDUCTEUR NON DÉSIGNÉ :
 - Ne jamais dire que la franchise du conjoint déclaré se cumule avec la franchise de base — c'est FAUX
 - Mentionner qu'il existe des options de rachat de franchise pour les conducteurs non désignés
 
-FRANCHISES :
-- Véhicule électrique ou premium >50k€ : franchise jusqu'à 700€ = normal et acceptable, ce n'est PAS un défaut
-- Ne JAMAIS conseiller une franchise à 0€ — c'est irréaliste sur le marché français
-- Objectif réaliste de franchise réduite : 300-400€
+FRANCHISES — GRILLE DE RÉFÉRENCE OFFICIELLE LUMIO :
+Utilise cette grille pour évaluer si une franchise est basse, normale ou élevée.
+
+Citadine/Compacte 0-3 ans : Dommages 300-600€ | Vol/Incendie 300-600€ | BDG répa 0-100€ / rempl 100-250€
+Citadine/Compacte 3-8 ans : Dommages 400-700€ | Vol/Incendie 300-700€ | BDG répa 0-100€ / rempl 100-250€
+Citadine/Compacte >8 ans : Dommages 500-800€ | Vol/Incendie 400-800€ | BDG répa 0-100€ / rempl 100-250€
+Berline/Break 0-3 ans : Dommages 400-800€ | Vol/Incendie 400-800€ | BDG répa 0-100€ / rempl 100-300€
+Berline/Break 3-8 ans : Dommages 500-900€ | Vol/Incendie 500-900€ | BDG répa 0-100€ / rempl 100-300€
+Berline/Break >8 ans : Dommages 600-1000€ | Vol/Incendie 600-1000€ | BDG répa 0-100€ / rempl 100-300€
+SUV/Monospace 0-3 ans : Dommages 500-1000€ | Vol/Incendie 500-1000€ | BDG répa 0-100€ / rempl 150-400€
+SUV/Monospace 3-8 ans : Dommages 600-1100€ | Vol/Incendie 600-1100€ | BDG répa 0-100€ / rempl 150-400€
+SUV/Monospace >8 ans : Dommages 700-1200€ | Vol/Incendie 700-1200€ | BDG répa 0-100€ / rempl 150-400€
+Haut de gamme/Sport 0-3 ans : Dommages 800-2000€ ou 5-10% (min 800-1500€) | Vol/Incendie 1000-3000€ | BDG répa 100-250€ / rempl 300-800€
+Haut de gamme/Sport 3-8 ans : Dommages 1000-2500€ | Vol/Incendie 1200-3500€ | BDG répa 100-250€ / rempl 300-800€
+Haut de gamme/Sport >8 ans : Dommages 1200-3000€ | Vol/Incendie 1500-4000€ | BDG répa 100-250€ / rempl 300-800€
+Électrique grand public 0-3 ans : Dommages 500-1200€ | Vol/Incendie 500-1200€ | BDG répa 0-100€ / rempl 200-500€
+Électrique grand public 3-8 ans : Dommages 600-1300€ | Vol/Incendie 600-1300€ | BDG répa 0-100€ / rempl 200-500€
+Électrique grand public >8 ans : Dommages 700-1400€ | Vol/Incendie 700-1400€ | BDG répa 0-100€ / rempl 200-500€
+Utilitaire pro 0-3 ans : Dommages 600-1200€ | Vol/Incendie 800-1500€
+Utilitaire pro 3-8 ans : Dommages 700-1300€ | Vol/Incendie 900-1700€
+Utilitaire pro >8 ans : Dommages 800-1500€ | Vol/Incendie 1000-2000€
+CatNat/Événements climatiques : franchise légale 380€ (toutes catégories)
+
+RÈGLES D'ÉVALUATION DES FRANCHISES :
+- Franchise EN BAS de la fourchette = EXCELLENT, classer en point fort
+- Franchise DANS la fourchette = normale, point neutre
+- Franchise EN HAUT de la fourchette = acceptable, signaler comme point d'attention
+- Franchise AU-DESSUS de la fourchette = élevée, point faible
+- Bris de glace 0€ (réparation impact) = point fort — standard marché
+- Ne JAMAIS conseiller franchise 0€ sur dommages — irréaliste
+- Des options de rachat de franchise existent — les mentionner si franchise élevée
+- Pour véhicule haut de gamme/sport ou électrique premium : les franchises sont naturellement plus élevées — ne pas pénaliser si dans la fourchette
 
 INDEMNISATION :
 - Valeur à neuf 2 ans puis expert+20% = standard du marché = BON niveau
