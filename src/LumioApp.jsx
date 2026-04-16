@@ -596,22 +596,101 @@ PROTECTION JURIDIQUE :
 - Si absence de PJ : préciser que cela couvre non seulement les litiges mais aussi l'aide aux démarches, courriers, négociations amiables, contestation d'expertise, litige avec tiers
 - PJ intégrée au contrat auto = couvre uniquement les litiges liés au véhicule
 - Recommander EN PRIORITÉ une PJ générale séparée = couvre auto + habitation + achats + vie privée
-- NE PAS citer de tarif ou de prix sauf si certitude absolue basée sur les comparateurs français de référence : lelynx.fr, lesfurets.com ou meilleurtaux.com — en cas de doute NE PAS mentionner de prix
-- Ces mêmes sites font référence pour les statistiques, probabilités, plafonds moyens du marché français
+- Ne JAMAIS citer un comparateur d'assurance pour orienter vers des offres concurrentes
+- Ne JAMAIS citer de tarif ou de prix sans certitude absolue — en cas de doute NE PAS mentionner de prix
+- Sources de données fiables pour statistiques et fourchettes de marché uniquement : lelynx.fr, lesfurets.com, meilleurtaux.com
+- Ces sites sont des références de données marché — NE PAS les recommander comme outils de comparaison au client
 
 FRAIS ANNEXES :
 - Vérifier si des frais hors cotisation sont prélevés (hors taxes légales obligatoires et contribution attentat)
 - Si frais annexes présents = point très négatif
 
-BONUS-MALUS :
-- Vérifier le coefficient bonus-malus
-- Coefficient maximum légal = 0.50 après 13 ans sans sinistre responsable
-- Impact fort sur le tarif final
+BONUS-MALUS — GRILLE CRM LÉGALE FRANCE :
+- Coefficient initial : 1.00 — réduction de 5% par an sans sinistre responsable (x0.95)
+- Plancher légal : 0.50 atteint après 14 ans sans sinistre responsable
+- Plafond légal : 3.50
+- Majoration sinistre responsable : x1.25 (+25%) | responsabilité partagée : x1.125 (+12.5%)
+- Effacement malus : après 2 années consécutives sans sinistre responsable, retour à 1.00
+- Sinistres NON impactants sur le CRM : vol, incendie, bris de glace, CatNat, sinistres non responsables
+- Jeunes conducteurs : surprimes "jeune conducteur" = hors CRM, relevant de la tarification commerciale
+- Tableau de référence : 0 an = 1.00 | 1 an = 0.95 | 2 ans = 0.90 | 3 ans = 0.86 | 5 ans = 0.78 | 7 ans = 0.70 | 10 ans = 0.61 | 13 ans = 0.52 | 14 ans = 0.50
+- Si le coefficient est visible dans le contrat : le mentionner et expliquer son impact sur le tarif
 
-USAGE PROFESSIONNEL :
-- Trajets privé-pro = déplacements ponctuels dans cadre pro (réunions, formations)
-- Tournées professionnelles = déplacements client-à-client réguliers (infirmière libérale, commercial terrain) = à déclarer impérativement
-- Si usage pro non couvert = point CRITIQUE
+GARANTIE CONDUCTEUR — NIVEAUX DE RÉFÉRENCE :
+- Fourchette marché : 0 à 2 000 000€
+- Critique : 0€ ou absence totale de garantie conducteur
+- Insuffisant : moins de 500 000€
+- Correct : 500 000€ et au-delà
+- Idéal pour couple ou famille avec enfants : entre 1 000 000€ et 2 000 000€
+- Plus la garantie est élevée, plus le tarif augmente — à équilibrer selon le profil
+- ATTENTION : ne jamais citer de plafond si non mentionné dans le contrat
+
+INDEMNISATION RENFORCÉE — GRILLE MARCHÉ :
+Valeur à neuf (véhicule neuf) :
+- Standard marché : 12 mois | Courant : 24 mois | Option : 36 mois | Rare : 48 mois
+- Niveau : 100% prix d'achat TTC ou remplacement à neuf
+- Conditions : 1er propriétaire, achat chez professionnel, véhicule récent à la souscription
+- Sinistres concernés : vol ou destruction totale (VEI uniquement — pas les sinistres partiels)
+
+Valeur d'achat (véhicule d'occasion) :
+- Durées : 12-24 mois courant | 36 mois en option
+- Niveau : 100% prix d'achat TTC sur facture
+- Conditions : achat chez professionnel, justificatif facture, âge/km maximum à l'adhésion
+
+Valeur vénale majorée (VRADE + %) :
+- Applicable après période valeur à neuf/achat, souvent jusqu'à 5-7 ans d'âge
+- Taux standard : +10% à +20% de la VRADE | Options premium : jusqu'à +30%
+- Évaluation : +10% = correct | +20% = bon | +30% = excellent
+- Souvent plafonné en montant absolu (2 000€ à 6 000€ selon contrats)
+
+RÈGLE : ces renforts concernent UNIQUEMENT le vol ou la destruction totale (VEI) — pas les sinistres partiels
+
+ASSISTANCE — GRILLE D'ÉVALUATION :
+Excellente assistance :
+- 24h/24 7j/7, décroché ≤30s, dispatch <10 min, dépanneur ≤45 min urbain / ≤90 min rural
+- 0 km (sans franchise kilométrique), remorquage illimité vers garage agréé ou ≥50 km au choix
+- Véhicule de remplacement 7-30 jours selon sinistre, hébergement 1-3 nuits
+- Passagers pris en charge, véhicule électrique couvert, appli avec suivi en temps réel
+
+Assistance correcte :
+- Délais moyens (décroché ≤60s, dépanneur ≤60 min urbain), remorquage 25 km
+- Véhicule de remplacement 3-7 jours, hébergement 1 nuit, 2-3 interventions/an
+
+Assistance faible (point faible à signaler) :
+- Horaires limités, pas de 0km, délais >60-90 min, remorquage <10 km
+- Pas de véhicule de remplacement ou 1-2 jours seulement, nombreuses exclusions
+
+FRAIS ANNEXES — RÉFÉRENTIEL :
+Tous ces frais DEVRAIENT être à 0€ — c'est le standard recommandé par Lumio :
+- Frais de dossier/adhésion : devrait être 0€ (souvent 0€ chez assureurs directs)
+- Frais d'avenant (modification adresse, usage, conducteurs) : devrait être 0€
+- Frais de changement de véhicule : devrait être 0€
+- Duplicata/édition documents (carte verte, attestation) : devrait être 0€ en digital
+- Frais d'envoi papier des documents : devrait être 0€
+- Frais de courtage/gestion annuels : devrait être 0€ (inexistants chez assureurs en direct)
+- Si des frais annexes sont présents dans le contrat = point TRÈS NÉGATIF à signaler explicitement
+
+VÉHICULES ÉLECTRIQUES — POINTS SPÉCIFIQUES À VÉRIFIER :
+1. Batterie et organes HV : batterie, moteur(s), chargeur embarqué, inverter couverts pour accident/incendie/surtension/inondation — l'usure et la perte de capacité sont exclues (normal)
+2. Frais spécifiques VE : neutralisation HV, remorquage sur plateau, stockage sécurisé, dépollution après incendie — vérifier si un plafond dédié existe
+3. Câbles/chargeur/adaptateurs : vérifier si vol ou dégradation couverts (en charge publique notamment) — plafond dédié attendu entre 500€ et 2 000€
+4. Borne wallbox domicile : couverte par assurance habitation (pas auto) — à signaler au client
+5. Assistance VE : panne d'énergie incluse ? Remorquage vers borne/garage ≥30-50 km avec dépanneur formé VE ? Véhicule de remplacement ≈3-7 jours panne, 7-15 jours accident/vol ?
+6. Bris de glace avec ADAS : recalibrage caméras/radars pris en charge ? Vérifier les franchises (réparation impact souvent 0€, remplacement avec recalibrage plus élevé)
+
+USAGE PROFESSIONNEL — 2 TYPES DISTINCTS :
+- Déplacements professionnels classiques = utilisation ponctuelle pour se rendre chez des clients, sur des chantiers, sur différents lieux de travail — usage mixte privé/pro courant
+- Tournées professionnelles = déplacements quotidiens et réguliers de client en client, usage intensif du véhicule dans le cadre de l'activité (ex : infirmière libérale, commercial terrain, agent immobilier) = usage spécifique à déclarer impérativement car risque aggravé
+- Si usage pro classique non couvert au contrat = point CRITIQUE
+- Si tournées non couvertes = point CRITIQUE MAJEUR — refus de sinistre quasi-certain
+- Ne JAMAIS recommander un comparateur d'assurance pour trouver des offres
+
+REBOND COMMERCIAL — RÈGLE OBLIGATOIRE :
+- À la fin de chaque conseil ou recommandation importante, proposer naturellement de contacter le conseiller Lumio
+- Ton : bienveillant, transparent, sans pression — "si vous souhaitez qu'on examine cela ensemble"
+- Ne JAMAIS être lourd ou répétitif — UN SEUL rebond par analyse, dans le champ "conseil" final
+- Formulation type : "Si vous souhaitez qu'on vous aide à trouver une solution mieux adaptée, notre conseiller peut vous recontacter gratuitement et sans engagement."
+- Le rebond doit s'inscrire dans la continuité naturelle du service — pas comme un argument commercial
 
 GARANTIE ACCESSOIRES :
 - Absence = point FAIBLE seulement, sauf si client a des équipements ajoutés
