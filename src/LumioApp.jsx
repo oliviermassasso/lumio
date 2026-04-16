@@ -670,7 +670,81 @@ Tous ces frais DEVRAIENT être à 0€ — c'est le standard recommandé par Lum
 - Frais de courtage/gestion annuels : devrait être 0€ (inexistants chez assureurs en direct)
 - Si des frais annexes sont présents dans le contrat = point TRÈS NÉGATIF à signaler explicitement
 
-CONTENU DU VÉHICULE / OBJETS TRANSPORTÉS — PLAFONDS MARCHÉ :
+STATIONNEMENT — CONDITIONS EXIGÉES PAR LES ASSUREURS :
+IMPORTANT : Ces pratiques varient selon les assureurs — ne pas les qualifier de critiques sans preuve dans le contrat. Ce sont des points de vigilance à vérifier, pas des lacunes certaines.
+
+Véhicules standard (citadine, compacte, berline grand public) :
+- Pas d'obligation de garage fermé en général
+- Déclaration du lieu habituel obligatoire (rue, cour, garage)
+- Effraction avérée toujours exigée pour indemnisation vol
+- Franchise/prime souvent réduite si garage fermé déclaré
+- Restriction possible selon certains contrats : franchise vol majorée la nuit sur voie publique
+
+SUV/berline haut de gamme (>30 000-50 000€) :
+- Certains assureurs exigent un lieu privatif clos ou garage la nuit — pas tous
+- Alarme et/ou antidémarrage homologué parfois requis selon contrat
+- Traqueur/balise parfois exigé pour modèles très exposés — à vérifier dans les conditions particulières
+
+Véhicules premium/sport/luxe (>60 000-80 000€) :
+- Certains assureurs imposent garage fermé la nuit et cumul d'antivols — pas systématique
+- Les conditions particulières du contrat font foi — toujours les vérifier
+
+RÈGLES D'ANALYSE STATIONNEMENT :
+- Vérifier dans les conditions particulières si des exigences de stationnement sont mentionnées
+- Si le contrat mentionne explicitement une exigence non respectée → POINT DE VIGILANCE à signaler
+- Si aucune exigence n'est précisée dans le contrat → ne pas alerter
+- Si changement de stationnement non signalé à l'assureur → point de vigilance : recommander de mettre à jour la déclaration
+- Ne jamais affirmer qu'un sinistre sera refusé sans preuve explicite dans le contrat
+Capital décès accidentel :
+- Standard marché : 20 000-50 000€
+- Options/premium : 75 000-200 000€
+- Évaluation : <20 000€ = insuffisant | 20 000-50 000€ = correct | >75 000€ = bon | >100 000€ = excellent
+
+Capital invalidité permanente (AIPP/IP) :
+- Standard : 50 000-200 000€
+- Options/premium : 300 000-1 000 000€
+- Seuil de déclenchement : franchise AIPP 10% standard | 1-5% ou sans franchise = premium
+- Calcul : proportionnel (AIPP 20% → 20% du capital) ou barème progressif (majore les forts taux)
+- Évaluation Lumio : <50 000€ = insuffisant | 50 000-200 000€ = correct | >300 000€ = bon
+
+Niveaux recommandés selon profil :
+- Minimum recommandé : capital invalidité 200 000-300 000€ si revenus/charges importants
+- Capital décès : 50 000-100 000€ minimum, à ajuster selon situation familiale
+- Couple/famille avec enfants : viser 500 000€+ en invalidité et 100 000€+ en décès
+
+Rente d'invalidité (option) :
+- Montant marché : 300-1 500€/mois
+- Seuil de déclenchement : AIPP ≥33% ou ≥66% selon contrats
+- Durée : jusqu'à 60-67 ans avec indexation possible
+- Délai de carence habituel : 90-180 jours
+
+Indemnités journalières ITT (option) :
+- Standard : 15-60€/jour | Franchise 3-7 jours | Durée 30-180 jours
+
+Frais de soins et rééducation :
+- Standard : 1 000-10 000€ par sinistre
+- Premium : 20 000-100 000€
+- Souvent avec sous-plafonds (prothèses, dentaire, orthopédie)
+
+Exclusions usuelles à vérifier :
+- Alcoolémie/stupéfiants au-delà des seuils légaux → exclusion ou refus de garantie
+- Sports/activités à risque et compétitions → exclus sans option
+- Au-delà de 70-75 ans : réductions de capitaux ou cessation de certaines garanties
+- Pathologies non accidentelles : hors champ de la garantie conducteur
+
+Points forts à identifier :
+- Barème progressif AIPP (meilleur que proportionnel pour les forts taux)
+- Franchise AIPP ≤5% ou sans franchise
+- Rente d'invalidité incluse
+- Aménagement habitat/véhicule couvert
+- Assistance psychologique incluse
+
+Note importante : la garantie conducteur auto couvre l'accident de circulation en tant que conducteur — une GAV (garantie accidents de la vie) couvre plus largement la vie privée, les deux sont complémentaires
+
+VÉHICULE DE COLLECTION :
+- Ne pas analyser ce type de véhicule avec les règles standard
+- Indiquer immédiatement dans le résumé et le conseil que ce véhicule nécessite une expertise spécialisée
+- Dans le champ "conseil" : inviter le client à contacter directement un conseiller Lumio pour une étude personnalisée adaptée aux véhicules de collection
 Effets personnels (vêtements, sac, petits objets) : 300-800€ par sinistre (limite par objet 50-200€) | Formules confort/premium : 1 000-1 500€
 Bagages en déplacement/vacances : 500-2 000€ global (limite par objet 150-300€)
 Équipements électroniques (smartphone, tablette, ordinateur) : souvent exclus ou 150-300€ par objet — souvent non couverts si visibles
