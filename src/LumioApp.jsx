@@ -536,14 +536,22 @@ Score 1/5 : Couverture dangereusement insuffisante, risques majeurs non couverts
 
 CONDUCTEUR PRINCIPAL :
 - Le conducteur principal est TOUJOURS celui qui réalise le plus de kilomètres par an avec ce véhicule
-- Si un jeune conducteur ou un tiers utilise le véhicule plus que le souscripteur = il doit être déclaré conducteur principal
 - Fausse déclaration conducteur principal = risque de nullité du contrat et refus total de sinistre
 
+JEUNE CONDUCTEUR — RÈGLE PRÉCISE :
+- Si jeune conducteur présent ET confirmé comme conducteur principal réel (fait le plus de km) mais déclaré secondaire au contrat → ALERTE CRITIQUE : fausse déclaration, risque de nullité et refus total de sinistre
+- Si jeune conducteur présent mais PAS le conducteur principal réel → POINT DE VIGILANCE uniquement : rappeler les risques d'une fausse déclaration sans en faire un point critique et sans impact sur la note
+- Si la situation du conducteur principal n'est pas clairement établie → POINT DE VIGILANCE seulement, jamais d'alerte critique
+- Ne jamais générer d'alerte critique sur ce point sans confirmation explicite que le jeune est le principal utilisateur
+
 FRANCHISE CONDUCTEUR NON DÉSIGNÉ :
-- La franchise supplémentaire (ex: 1 500€) s'applique UNIQUEMENT si un conducteur NON déclaré au contrat a un sinistre
-- Les conducteurs désignés nominativement au contrat (conjoint, enfant déclaré) bénéficient de la MÊME franchise que le souscripteur
-- Ne jamais dire que la franchise du conjoint déclaré se cumule avec la franchise de base — c'est FAUX
-- Mentionner qu'il existe des options de rachat de franchise pour les conducteurs non désignés
+- La franchise supplémentaire s'applique UNIQUEMENT si un conducteur NON déclaré au contrat a un sinistre
+- Les conducteurs désignés nominativement bénéficient de la même franchise que le souscripteur
+- IMPORTANT : dans la majorité des contrats français, le conjoint (marié ou pacsé) et les enfants en conduite accompagnée (AAC) bénéficient automatiquement du niveau de franchise normal SANS être nommément désignés
+- Partir de ce principe favorable par défaut pour tous les contrats
+- Mettre en point de VIGILANCE seulement s'il y a une clause restrictive explicite dans le contrat
+- Ne jamais générer d'alerte critique sur ce point sauf clause contractuelle explicite contraire
+- Ce point n'impacte PAS la note globale du contrat
 
 FRANCHISES — GRILLE DE RÉFÉRENCE OFFICIELLE LUMIO :
 Utilise cette grille pour évaluer si une franchise est basse, normale ou élevée.
@@ -691,10 +699,11 @@ Véhicules premium/sport/luxe (>60 000-80 000€) :
 
 RÈGLES D'ANALYSE STATIONNEMENT :
 - Vérifier dans les conditions particulières si des exigences de stationnement sont mentionnées
-- Si le contrat mentionne explicitement une exigence non respectée → POINT DE VIGILANCE à signaler
+- Si le contrat mentionne explicitement une exigence non respectée par le client → POINT CRITIQUE : signaler le risque de refus de sinistre
 - Si aucune exigence n'est précisée dans le contrat → ne pas alerter
-- Si changement de stationnement non signalé à l'assureur → point de vigilance : recommander de mettre à jour la déclaration
-- Ne jamais affirmer qu'un sinistre sera refusé sans preuve explicite dans le contrat
+- Si changement de stationnement non signalé à l'assureur → POINT CRITIQUE : incohérence profil/contrat, recommander une déclaration de mise à jour urgente
+- L'IA signale uniquement ce qui est écrit dans le contrat, jamais par supposition
+- Ne jamais générer d'alerte sans preuve explicite dans le contrat
 Capital décès accidentel :
 - Standard marché : 20 000-50 000€
 - Options/premium : 75 000-200 000€
@@ -709,8 +718,8 @@ Capital invalidité permanente (AIPP/IP) :
 
 Niveaux recommandés selon profil :
 - Minimum recommandé : capital invalidité 200 000-300 000€ si revenus/charges importants
-- Capital décès : 50 000-100 000€ minimum, à ajuster selon situation familiale
-- Couple/famille avec enfants : viser 500 000€+ en invalidité et 100 000€+ en décès
+- Capital décès : 50 000-100 000€ minimum général | famille avec enfants : 500 000€ minimum requis
+- Couple/famille avec enfants : viser 500 000€+ en invalidité | capital décès minimum requis 500 000€
 
 Rente d'invalidité (option) :
 - Montant marché : 300-1 500€/mois
