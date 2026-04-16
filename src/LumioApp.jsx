@@ -523,24 +523,82 @@ export default function Lumio() {
               },
               {
                 type: "text",
-                text: `Tu es un expert en assurance automobile française avec 20 ans d'expérience. Analyse ce contrat d'assurance auto en tenant compte du profil client suivant : ${profileSummary}.
+                text: `Tu es un expert en assurance automobile française avec 20 ans d'expérience terrain, ancien agent général AXA. Analyse ce contrat d'assurance auto en tenant compte du profil client : ${profileSummary}.
 
-Retourne UNIQUEMENT un objet JSON valide (sans markdown, sans backticks) avec exactement cette structure :
+═══ GRILLE DE NOTATION OFFICIELLE ═══
+Score 5/5 : Contrat excellent, toutes garanties adaptées au profil, franchises correctes, options clés présentes
+Score 4/5 : Bon contrat, 1-2 points mineurs à améliorer
+Score 3/5 : Contrat correct, lacunes sur garanties secondaires ou franchises un peu élevées
+Score 2/5 : Contrat insuffisant, lacunes sur garanties importantes pour ce profil
+Score 1/5 : Couverture dangereusement insuffisante, risques majeurs non couverts
+
+═══ RÈGLES MÉTIER OBLIGATOIRES ═══
+
+FRANCHISES :
+- Véhicule électrique ou premium >50k€ : franchise jusqu'à 700€ = normal et acceptable, ce n'est PAS un défaut
+- Ne JAMAIS conseiller une franchise à 0€ — c'est irréaliste sur le marché
+- Franchise réduite réaliste à négocier : 300-400€ max
+
+INDEMNISATION :
+- Valeur à neuf 2 ans puis expert+20% = standard du marché = BON niveau, ce n'est pas insuffisant
+- Pour Tesla ou véhicule à faible dépréciation : expert+20% est AVANTAGEUX car la valeur reste haute
+- Certains contrats proposent jusqu'à expert+30% mais 20% reste très correct
+
+ASSISTANCE :
+- Assistance 0km (sans franchise kilométrique) = TOUJOURS classer en point fort majeur
+- Franchise kilométrique (ex: pas d'assistance dans rayon 30-50km) = point faible important
+
+PROTECTION JURIDIQUE :
+- PJ intégrée au contrat auto = acceptable pour litiges auto uniquement
+- TOUJOURS recommander EN PRIORITÉ une PJ générale séparée = couvre auto + habitation + achats + vie privée pour quelques euros de plus
+- Ne pas critiquer une PJ intégrée, mais recommander systématiquement la PJ générale en complément
+
+FRAIS ANNEXES :
+- Vérifier si l'assureur prélève des frais hors cotisation (hors taxes légales obligatoires et contribution attentat)
+- Si frais annexes présents (frais de dossier, frais de gestion...) = point très négatif à signaler explicitement
+
+BONUS-MALUS :
+- Vérifier le coefficient bonus-malus déclaré
+- Coefficient maximum légal = 0.50 (50%) obtenu après 13 ans sans sinistre responsable
+- Le coefficient impacte fortement le tarif final — à mentionner si visible dans le contrat
+
+USAGE PROFESSIONNEL :
+- Trajets privé-pro = déplacements ponctuels dans cadre professionnel (réunions, formations) = usage courant
+- Tournées professionnelles = déplacements client-à-client réguliers (ex: infirmière libérale, commercial terrain) = usage spécifique à déclarer impérativement
+- Si usage pro non couvert ou mal déclaré = point CRITIQUE — refus de sinistre possible
+
+JEUNE CONDUCTEUR :
+- Si jeune conducteur déclaré secondaire mais conducteur principal réel = ALERTE CRITIQUE fausse déclaration = risque de refus total de sinistre et nullité du contrat
+
+GARANTIE ACCESSOIRES/ÉQUIPEMENTS :
+- Absence de garantie accessoires ajoutés = point FAIBLE seulement (pas critique), sauf si client a déclaré avoir des équipements ajoutés
+
+FRANCHISE CONDUCTEUR NON DÉSIGNÉ :
+- Franchise majorée si conduite par tiers = critique SEULEMENT si le client prête son véhicule (cf. profil)
+- Si client ne prête pas = point d'attention mineur seulement
+
+VÉHICULE DE REMPLACEMENT :
+- Absence totale = point faible important, surtout si véhicule indispensable (usage pro ou domicile-travail)
+- Uniquement via garage partenaire = insuffisant (pas garanti)
+- Garantie systématique = point fort
+
+═══ FORMAT DE RÉPONSE ═══
+Retourne UNIQUEMENT un objet JSON valide (sans markdown, sans backticks) :
 {
   "type": "type exact du contrat",
-  "compagnie": "nom de l'assureur",
+  "compagnie": "nom exact de l'assureur",
   "score": 3,
-  "resume": "résumé de 2-3 phrases claires pour un non-expert, en tenant compte du profil",
-  "garanties": ["garantie 1", "garantie 2", "garantie 3", "garantie 4"],
-  "exclusions": ["exclusion critique 1", "exclusion 2"],
-  "alertes": ["point attention 1", "point attention 2", "point attention 3"],
-  "points_forts": ["point fort 1", "point fort 2"],
-  "points_faibles": ["point faible 1", "point faible 2"],
-  "conseil": "conseil expert personnalisé en 1 phrase",
+  "resume": "2-3 phrases claires pour un non-expert, personnalisées selon le profil client",
+  "garanties": ["liste des garanties réellement présentes et importantes"],
+  "exclusions": ["exclusions vraiment critiques pour CE profil uniquement"],
+  "alertes": ["points d'attention contextualisés selon le profil"],
+  "points_forts": ["vrais points forts du contrat"],
+  "points_faibles": ["vrais points faibles du contrat"],
+  "conseil": "conseil expert personnalisé et actionnable en 1-2 phrases",
   "gaps": [
-    {"ok": true, "title": "titre", "detail": "explication", "tip": null},
-    {"ok": false, "title": "titre lacune", "detail": "explication du risque concret", "tip": "conseil expert"},
-    {"ok": "warn", "title": "titre alerte", "detail": "explication", "tip": "conseil"}
+    {"ok": true, "title": "point conforme", "detail": "explication positive", "tip": null},
+    {"ok": false, "title": "lacune critique", "detail": "risque concret pour CE client", "tip": "conseil expert précis et réaliste"},
+    {"ok": "warn", "title": "point à surveiller", "detail": "explication contextuelle", "tip": "conseil pratique"}
   ]
 }`
               }
@@ -813,29 +871,101 @@ Retourne UNIQUEMENT un objet JSON valide (sans markdown, sans backticks) avec ex
     );
   }
 
-  // ── QUESTIONS NIVEAU 3 (champ libre) ─────────────────────────────────────
+  // ── QUESTIONS NIVEAU 3 (bulles + champ libre) ────────────────────────────
   if (step === "q3") {
+    const BULLES = [
+      { id: "b1", icon: "🔑", text: "Je prête régulièrement mon véhicule à des proches" },
+      { id: "b2", icon: "💼", text: "J'utilise mon véhicule pour mon activité professionnelle" },
+      { id: "b3", icon: "👶", text: "Un jeune conducteur conduit ce véhicule" },
+      { id: "b4", icon: "🔧", text: "J'ai des équipements ajoutés (jantes, sono, GPS, attelage...)" },
+      { id: "b5", icon: "🚗", text: "Un véhicule de remplacement est indispensable pour moi" },
+      { id: "b6", icon: "⚖️", text: "Je n'ai pas de protection juridique du tout" },
+      { id: "b7", icon: "🌍", text: "Je souhaite être couvert hors Europe" },
+      { id: "b8", icon: "📍", text: "Je roule peu — moins de 5 000 km par an" },
+      { id: "b9", icon: "🔍", text: "Je veux savoir si je suis bien couvert" },
+      { id: "b10", icon: "💰", text: "Je cherche à réduire ma cotisation" },
+    ];
+
+    const texte = profile.besoins_libres || "";
+    const bullesActives = BULLES.filter(b => texte.includes(b.text));
+    const qualite = Math.min(100, (texte.length / 3) + (bullesActives.length * 15));
+    const qualiteLabel = qualite === 0 ? "Analyse standard" : qualite < 30 ? "Analyse enrichie" : qualite < 60 ? "Analyse personnalisée" : "Analyse expert ⭐";
+    const qualiteColor = qualite === 0 ? "#9CA3AF" : qualite < 30 ? "#3B82F6" : qualite < 60 ? "#C8922A" : "#065F46";
+
+    const toggleBulle = (bulle) => {
+      const current = profile.besoins_libres || "";
+      if (current.includes(bulle.text)) {
+        setAnswer("besoins_libres", current.replace(bulle.text + "\n", "").replace(bulle.text, "").trim());
+      } else {
+        setAnswer("besoins_libres", current ? current + "\n" + bulle.text : bulle.text);
+      }
+    };
+
     return (
       <div className="root"><style>{css}</style>
         <Nav back onBack={() => setStep("q2")} />
         <div className="section">
-          <div className="step-indicator">Étape 3 · Votre mot</div>
-          <div className="page-title">Y a-t-il autre chose ?</div>
-          <div className="page-sub">Optionnel mais précieux. Plus vous nous en dites, plus l'analyse sera précise — et mieux votre conseiller sera préparé.</div>
+          <div className="step-indicator">Étape 3 · Vos besoins</div>
+          <div className="page-title">Votre analyse sera 2× plus précise</div>
+          <div className="page-sub">Cliquez sur ce qui vous concerne — plus vous nous en dites, plus l'analyse sera juste.</div>
 
-          <div className="q-card">
-            <div className="q-why">💡 {Q_LEVEL3.why}</div>
-            <div className="q-label">{Q_LEVEL3.label}</div>
-            <textarea
-              className="form-textarea"
-              placeholder={Q_LEVEL3.placeholder}
-              value={profile.besoins_libres || ""}
-              onChange={e => setAnswer("besoins_libres", e.target.value)}
-            />
-            <div className="q-note">✏️ Optionnel — Vous pouvez passer directement si vous n'avez rien à ajouter</div>
+          {/* Bulles cliquables */}
+          <div style={{ background: "white", borderRadius: 16, padding: "20px", border: "1px solid #E8EEFF", boxShadow: "0 2px 12px rgba(11,31,75,0.06)", marginBottom: 14 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12 }}>
+              Cliquez sur ce qui vous concerne
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {BULLES.map(b => {
+                const active = texte.includes(b.text);
+                return (
+                  <button key={b.id} onClick={() => toggleBulle(b)} style={{
+                    padding: "9px 14px", borderRadius: 50,
+                    border: `2px solid ${active ? "#0B1F4B" : "#E8EEFF"}`,
+                    background: active ? "#0B1F4B" : "white",
+                    color: active ? "white" : "#374151",
+                    fontSize: 13, fontWeight: active ? 700 : 500,
+                    cursor: "pointer", transition: "all 0.2s",
+                    display: "flex", alignItems: "center", gap: 6,
+                    fontFamily: "'Plus Jakarta Sans',sans-serif",
+                  }}>
+                    <span>{b.icon}</span> {b.text}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Récap complet du profil */}
+          {/* Champ libre */}
+          <div style={{ background: "white", borderRadius: 16, padding: "20px", border: "1px solid #E8EEFF", boxShadow: "0 2px 12px rgba(11,31,75,0.06)", marginBottom: 14 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>
+              Ajoutez ce qu'on n'a pas prévu
+            </div>
+            <textarea
+              className="form-textarea"
+              placeholder="Ex : je transporte souvent du matériel médical, mon véhicule est modifié, j'ai eu un sinistre l'an dernier, je stationne dans un quartier exposé aux vols..."
+              value={texte}
+              onChange={e => setAnswer("besoins_libres", e.target.value)}
+              style={{ minHeight: 90 }}
+            />
+          </div>
+
+          {/* Barre de qualité */}
+          <div style={{ background: "white", borderRadius: 14, padding: "14px 18px", border: "1px solid #E8EEFF", marginBottom: 20 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: "#374151" }}>Qualité de l'analyse</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: qualiteColor }}>{qualiteLabel}</span>
+            </div>
+            <div style={{ height: 8, background: "#F0F4FF", borderRadius: 10 }}>
+              <div style={{ height: 8, width: `${Math.max(4, qualite)}%`, borderRadius: 10, background: qualite === 0 ? "#E8EEFF" : qualite < 30 ? "#3B82F6" : qualite < 60 ? "#C8922A" : "#10B981", transition: "all 0.4s ease" }}></div>
+            </div>
+            {qualite === 0 && (
+              <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 6 }}>
+                ⚡ Sélectionnez des bulles ou décrivez votre situation pour une analyse vraiment personnalisée
+              </div>
+            )}
+          </div>
+
+          {/* Récap profil */}
           <div className="profile-recap">
             <div style={{ fontSize: 12, fontWeight: 700, color: "#3B82F6", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>✅ Votre profil enregistré</div>
             <div className="profile-tags">
@@ -848,7 +978,7 @@ Retourne UNIQUEMENT un objet JSON valide (sans markdown, sans backticks) avec ex
 
           <div style={{ display: "flex", justifyContent: "flex-end" }}>
             <button className="btn-primary" onClick={() => setStep("upload")}>
-              Analyser mon contrat →
+              Déposer mon contrat →
             </button>
           </div>
         </div>
