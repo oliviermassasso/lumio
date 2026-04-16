@@ -634,6 +634,8 @@ GARANTIE CONDUCTEUR — NIVEAUX DE RÉFÉRENCE :
 - ATTENTION : ne jamais citer de plafond si non mentionné dans le contrat
 
 INDEMNISATION RENFORCÉE — GRILLE MARCHÉ :
+RÈGLE ABSOLUE : ne mentionner la valeur vénale majorée (expert+%) QUE si elle est explicitement écrite dans le contrat. Ne jamais supposer son existence.
+
 Valeur à neuf (véhicule neuf) :
 - Standard marché : 12 mois | Courant : 24 mois | Option : 36 mois | Rare : 48 mois
 - Niveau : 100% prix d'achat TTC ou remplacement à neuf
@@ -646,10 +648,10 @@ Valeur d'achat (véhicule d'occasion) :
 - Conditions : achat chez professionnel, justificatif facture, âge/km maximum à l'adhésion
 
 Valeur vénale majorée (VRADE + %) :
-- Applicable après période valeur à neuf/achat, souvent jusqu'à 5-7 ans d'âge
+- UNIQUEMENT si mentionnée explicitement dans le contrat
 - Taux standard : +10% à +20% de la VRADE | Options premium : jusqu'à +30%
 - Évaluation : +10% = correct | +20% = bon | +30% = excellent
-- Souvent plafonné en montant absolu (2 000€ à 6 000€ selon contrats)
+- Valeur à neuf 2 ans + expert+20% = BON niveau standard — ne pas critiquer
 
 RÈGLE : ces renforts concernent UNIQUEMENT le vol ou la destruction totale (VEI) — pas les sinistres partiels
 
@@ -857,18 +859,24 @@ Retourne UNIQUEMENT un objet JSON valide (sans markdown, sans backticks) :
   "compagnie": "nom exact de l'assureur",
   "score": 3,
   "resume": "2-3 phrases claires pour un non-expert, personnalisées selon le profil client",
-  "garanties": ["garanties réellement présentes et importantes"],
-  "exclusions": ["exclusions vraiment critiques pour CE profil uniquement"],
-  "alertes": ["points d'attention contextualisés selon le profil"],
-  "points_forts": ["vrais points forts du contrat"],
-  "points_faibles": ["vrais points faibles du contrat"],
-  "conseil": "conseil expert personnalisé et actionnable en 1-2 phrases",
+  "garanties": ["garanties réellement présentes et importantes — uniquement ce qui est écrit dans le contrat"],
+  "exclusions": ["UNIQUEMENT les vraies lacunes critiques : absence de couverture obligatoire pour CE profil, fausse déclaration, risque de refus total de sinistre, défaut de couverture majeur. NE PAS mettre : exclusions standard (alcool/stupéfiants), franchises normales, franchise conducteur non désigné standard, éléments hors du contrôle de l'assuré"],
+  "alertes": ["points d'attention contextualisés — choses à surveiller ou améliorer, mais pas critiques"],
+  "points_forts": ["vrais points forts du contrat basés sur ce qui est écrit"],
+  "points_faibles": ["points faibles réels — coverage insuffisante, franchise élevée, garantie absente mais non critique"],
+  "conseil": "conseil expert personnalisé et actionnable en 1-2 phrases avec rebond Lumio naturel",
   "gaps": [
     {"ok": true, "title": "point conforme", "detail": "explication positive", "tip": null},
-    {"ok": false, "title": "lacune critique", "detail": "risque concret pour CE client", "tip": "conseil expert précis et réaliste"},
+    {"ok": false, "title": "lacune critique", "detail": "risque concret pour CE client", "tip": "conseil expert précis et réaliste — sans citer de prix sauf certitude absolue"},
     {"ok": "warn", "title": "point à surveiller", "detail": "explication contextuelle", "tip": "conseil pratique"}
   ]
-}`
+}
+
+RÈGLES ABSOLUES DE CONTENU :
+- Ne JAMAIS citer une garantie, un plafond ou un taux qui n'est pas explicitement écrit dans le contrat
+- Ne JAMAIS mettre en point critique une exclusion standard (alcool/stupéfiants au-delà des seuils légaux, compétition, faute intentionnelle) — ce sont des exclusions légales normales présentes dans TOUS les contrats
+- Ne JAMAIS mettre en point critique une franchise normale dans la fourchette de référence
+- Ne JAMAIS citer le tarif d'une PJ ou d'une autre garantie — ne pas mentionner de prix sans certitude absolue`
               }
             ]
           }]
@@ -1300,8 +1308,7 @@ Retourne UNIQUEMENT un objet JSON valide (sans markdown, sans backticks) :
               ) : (
                 <>
                   <div style={{ fontSize: 36, marginBottom: 10 }}>📄</div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: "#0B1F4B", marginBottom: 6 }}>Cliquez ici pour choisir votre PDF</div>
-                  <div style={{ fontSize: 13, color: "#9CA3AF", marginBottom: 10 }}>ou glissez-déposez votre contrat</div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: "#0B1F4B", marginBottom: 10 }}>Cliquez ici pour choisir votre PDF</div>
                   <div style={{ display: "inline-block", background: "linear-gradient(135deg,#1D4ED8,#3B82F6)", color: "white", padding: "10px 24px", borderRadius: 10, fontSize: 14, fontWeight: 700 }}>
                     📂 Parcourir mes fichiers
                   </div>
@@ -1394,15 +1401,15 @@ Retourne UNIQUEMENT un objet JSON valide (sans markdown, sans backticks) :
             </div>
             {[
               { items: analysis.garanties, color: "#065F46", bg: "#ECFDF5", label: "✅ Garanties présentes", prefix: "✓" },
-              { items: analysis.exclusions, color: "#991B1B", bg: "#FEF2F2", label: "❌ Points critiques", prefix: "✕" },
-              { items: analysis.alertes, color: "#92400E", bg: "#FFF7ED", label: "⚠️ Points d'attention", prefix: "⚠" },
+              { items: analysis.exclusions, color: "#991B1B", bg: "#FEF2F2", label: "❌ Points critiques", prefix: "✕", border: "1px solid #FECACA" },
+              { items: analysis.alertes, color: "#92400E", bg: "#FFF7ED", label: "⚠️ Points d'attention", prefix: "⚠", border: "1px solid #FDE68A" },
               { items: analysis.points_forts, color: "#1E40AF", bg: "#EFF6FF", label: "💪 Points forts", prefix: "+" },
-              { items: analysis.points_faibles, color: "#374151", bg: "#F4F7FF", label: "📉 Points faibles", prefix: "−" },
+              { items: analysis.points_faibles, color: "#B45309", bg: "#FEF9C3", label: "📉 Points faibles", prefix: "−", border: "1px solid #FDE68A" },
             ].filter(s => s.items?.length > 0).map((s, idx) => (
               <div key={idx}>
                 <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.7, color: s.color, marginBottom: 8, marginTop: 18 }}>{s.label}</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                  {s.items.map((item, j) => <span key={j} style={{ padding: "6px 13px", borderRadius: 8, fontSize: 12, fontWeight: 600, background: s.bg, color: s.color }}>{s.prefix} {item}</span>)}
+                  {s.items.map((item, j) => <span key={j} style={{ padding: "6px 13px", borderRadius: 8, fontSize: 12, fontWeight: 600, background: s.bg, color: s.color, border: s.border || "none" }}>{s.prefix} {item}</span>)}
                 </div>
               </div>
             ))}
@@ -1446,7 +1453,12 @@ Retourne UNIQUEMENT un objet JSON valide (sans markdown, sans backticks) :
               </div>
             </div>
             <div style={{ padding: "4px 26px 16px" }}>
-              {analysis.gaps.map((g, i) => (
+              {[...analysis.gaps]
+                .sort((a, b) => {
+                  const order = { true: 0, warn: 1, false: 2 };
+                  return order[a.ok] - order[b.ok];
+                })
+                .map((g, i) => (
                 <div key={i} style={{ display: "flex", gap: 14, padding: "15px 0", borderBottom: i < analysis.gaps.length - 1 ? "1px solid #F0F4FF" : "none" }}>
                   <div style={{ width: 34, height: 34, borderRadius: 10, flexShrink: 0, marginTop: 2, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 800, background: g.ok === true ? "#ECFDF5" : g.ok === "warn" ? "#FFF7ED" : "#FEF2F2", color: g.ok === true ? "#065F46" : g.ok === "warn" ? "#92400E" : "#991B1B" }}>
                     {g.ok === true ? "✓" : g.ok === "warn" ? "⚠" : "✕"}
