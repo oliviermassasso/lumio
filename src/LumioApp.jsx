@@ -575,74 +575,86 @@ export default function Lumio() {
     setUploading(true);
     setUploadError("");
     try {
-      // ── EXTRACTION TEXTE via pdf.js (réduit les tokens de 40-60%) ──
-      let pdfContent = null;
-      let useBase64 = false;
+      const isImage = file.type.startsWith("image/");
+      const isTxt = file.type === "text/plain" || file.name.endsWith(".txt");
+      const isPdf = file.type === "application/pdf" || file.name.endsWith(".pdf");
 
-      try {
-        const pdfjsLib = await import("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js");
-        const pdfjsModule = window["pdfjs-dist/build/pdf"] || window.pdfjsLib;
-
-        // Charger pdf.js depuis CDN si pas déjà disponible
-        if (!window.pdfjsLib) {
-          await new Promise((resolve, reject) => {
-            const script = document.createElement("script");
-            script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
-            script.onload = resolve;
-            script.onerror = reject;
-            document.head.appendChild(script);
-          });
-          window.pdfjsLib.GlobalWorkerOptions.workerSrc =
-            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-        }
-
-        const arrayBuffer = await file.arrayBuffer();
-        const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        const numPages = Math.min(pdf.numPages, 40); // max 40 pages
-        let fullText = "";
-
-        for (let i = 1; i <= numPages; i++) {
-          const page = await pdf.getPage(i);
-          const content = await page.getTextContent();
-          const pageText = content.items.map(item => item.str).join(" ");
-          fullText += pageText + "\n";
-        }
-
-        // Vérifier qu'on a bien du texte (PDF non scanné)
-        if (fullText.trim().length > 200) {
-          // Tronquer à ~12 000 caractères pour rester dans les limites
-          pdfContent = fullText.trim().slice(0, 12000);
-        } else {
-          useBase64 = true;
-        }
-      } catch (e) {
-        // pdf.js a échoué → fallback vers base64
-        useBase64 = true;
-      }
-
-      // Fallback : envoyer le PDF en base64 (PDF scanné ou erreur)
-      let base64 = null;
-      if (useBase64) {
-        const reader = new FileReader();
-        base64 = await new Promise((resolve, reject) => {
-          reader.onload = () => resolve(reader.result.split(",")[1]);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
-      }
+      let userContent = null;
 
       const profileSummary = Object.entries(profile)
         .filter(([k, v]) => v && (Array.isArray(v) ? v.length > 0 : true))
         .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(", ") : v}`)
         .join(" | ");
 
-      // Construire le message selon le mode (texte ou base64)
-      const userContent = useBase64 ? [
-        { type: "document", source: { type: "base64", media_type: "application/pdf", data: base64 } },
-        { type: "text", text: buildPrompt(profileSummary) }
-      ] : [
-        { type: "text", text: `CONTRAT D'ASSURANCE (texte extrait) :\n\n${pdfContent}\n\n---\n\n${buildPrompt(profileSummary)}` }
-      ];
+      // ── TXT : lecture directe ──
+      if (isTxt) {
+        const text = await file.text();
+        userContent = [{ type: "text", text: `CONTRAT D'ASSURANCE :\n\n${text.slice(0, 12000)}\n\n---\n\n${buildPrompt(profileSummary)}` }];
+
+      // ── IMAGE : envoi en base64 ──
+      } else if (isImage) {
+        const reader = new FileReader();
+        const base64 = await new Promise((resolve, reject) => {
+          reader.onload = () => resolve(reader.result.split(",")[1]);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+        const mediaType = file.type || "image/jpeg";
+        userContent = [
+          { type: "image", source: { type: "base64", media_type: mediaType, data: base64 } },
+          { type: "text", text: buildPrompt(profileSummary) }
+        ];
+
+      // ── PDF : extraction texte via pdf.js, fallback base64 ──
+      } else if (isPdf) {
+        let pdfContent = null;
+        let useBase64 = false;
+        try {
+          if (!window.pdfjsLib) {
+            await new Promise((resolve, reject) => {
+              const script = document.createElement("script");
+              script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+              script.onload = resolve;
+              script.onerror = reject;
+              document.head.appendChild(script);
+            });
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+              "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+          }
+          const arrayBuffer = await file.arrayBuffer();
+          const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+          const numPages = Math.min(pdf.numPages, 40);
+          let fullText = "";
+          for (let i = 1; i <= numPages; i++) {
+            const page = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            fullText += content.items.map(item => item.str).join(" ") + "\n";
+          }
+          if (fullText.trim().length > 200) {
+            pdfContent = fullText.trim().slice(0, 12000);
+          } else {
+            useBase64 = true;
+          }
+        } catch (e) {
+          useBase64 = true;
+        }
+        if (useBase64) {
+          const reader = new FileReader();
+          const base64 = await new Promise((resolve, reject) => {
+            reader.onload = () => resolve(reader.result.split(",")[1]);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
+          userContent = [
+            { type: "document", source: { type: "base64", media_type: "application/pdf", data: base64 } },
+            { type: "text", text: buildPrompt(profileSummary) }
+          ];
+        } else {
+          userContent = [{ type: "text", text: `CONTRAT D'ASSURANCE (texte extrait) :\n\n${pdfContent}\n\n---\n\n${buildPrompt(profileSummary)}` }];
+        }
+      } else {
+        throw new Error("Format non supporté.");
+      }
 
       const res = await fetch("/api/analyze", {
         method: "POST",
@@ -675,12 +687,22 @@ export default function Lumio() {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (file && file.type === "application/pdf") {
+    if (!file) return;
+    const ok = [
+      "application/pdf",
+      "image/jpeg", "image/jpg", "image/png", "image/webp",
+      "text/plain"
+    ].includes(file.type) || file.name.match(/\.(pdf|jpg|jpeg|png|webp|txt)$/i);
+    if (ok) {
       setUploadedFile(file);
       setUploadError("");
-    } else if (file) {
-      setUploadError("Format non supporté. Veuillez déposer un fichier PDF.");
+    } else {
+      setUploadError("Format non supporté. Formats acceptés : PDF, JPG, PNG, TXT.");
     }
+  };
+
+  const triggerFileInput = () => {
+    if (fileInputRef.current) fileInputRef.current.click();
   };
 
   const Nav = ({ back, onBack }) => (
@@ -1090,45 +1112,53 @@ export default function Lumio() {
             </div>
           )}
 
-          {/* ZONE UPLOAD RÉELLE */}
-          <label htmlFor="pdf-upload" style={{ display: "block", cursor: "pointer" }}>
-            <div className="upload-zone" style={{ borderColor: uploadedFile ? "#3B82F6" : undefined, background: uploadedFile ? "#EFF6FF" : undefined }}>
-              {uploading ? (
-                <>
-                  <div style={{ fontSize: 36, marginBottom: 10 }}>⏳</div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: "#0B1F4B", marginBottom: 6 }}>Analyse en cours…</div>
-                  <div style={{ fontSize: 13, color: "#9CA3AF" }}>L'IA lit votre contrat, patientez 30 secondes</div>
-                  <div style={{ marginTop: 14, width: "60%", height: 4, background: "#E8EEFF", borderRadius: 10, margin: "14px auto 0" }}>
-                    <div style={{ height: 4, width: "70%", background: "linear-gradient(90deg,#3B82F6,#60A5FA)", borderRadius: 10, animation: "fadeUp 1s ease infinite" }}></div>
-                  </div>
-                </>
-              ) : uploadedFile ? (
-                <>
-                  <div style={{ fontSize: 36, marginBottom: 10 }}>✅</div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: "#0B1F4B", marginBottom: 4 }}>📄 {uploadedFile.name}</div>
-                  <div style={{ fontSize: 13, color: "#3B82F6", marginBottom: 6 }}>Fichier sélectionné — cliquez pour changer</div>
-                </>
-              ) : (
-                <>
-                  <div style={{ fontSize: 36, marginBottom: 10 }}>📄</div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: "#0B1F4B", marginBottom: 10 }}>Cliquez ici pour choisir votre PDF</div>
-                  <div style={{ display: "inline-block", background: "linear-gradient(135deg,#1D4ED8,#3B82F6)", color: "white", padding: "10px 24px", borderRadius: 10, fontSize: 14, fontWeight: 700 }}>
-                    📂 Parcourir mes fichiers
-                  </div>
-                  <div style={{ fontSize: 11, color: "#C4BAA8", marginTop: 10 }}>PDF uniquement · Contrat auto, habitation, santé…</div>
-                </>
-              )}
-            </div>
-          </label>
+          {/* INPUT CACHÉ — déclenché par bouton */}
           <input
-            id="pdf-upload"
             type="file"
-            accept=".pdf,application/pdf"
+            accept=".pdf,.jpg,.jpeg,.png,.webp,.txt,application/pdf,image/jpeg,image/png,image/webp,text/plain"
             ref={fileInputRef}
-            style={{ position: "absolute", width: 1, height: 1, opacity: 0, overflow: "hidden" }}
+            style={{ display: "none" }}
             onChange={handleFileChange}
             disabled={uploading}
           />
+
+          {/* ZONE UPLOAD */}
+          <div className="upload-zone" style={{ borderColor: uploadedFile ? "#3B82F6" : undefined, background: uploadedFile ? "#EFF6FF" : undefined }}>
+            {uploading ? (
+              <>
+                <div style={{ fontSize: 36, marginBottom: 10 }}>⏳</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "#0B1F4B", marginBottom: 6 }}>Analyse en cours…</div>
+                <div style={{ fontSize: 13, color: "#9CA3AF" }}>L'IA lit votre contrat, patientez 30 secondes</div>
+                <div style={{ marginTop: 14, width: "60%", height: 4, background: "#E8EEFF", borderRadius: 10, margin: "14px auto 0" }}>
+                  <div style={{ height: 4, width: "70%", background: "linear-gradient(90deg,#3B82F6,#60A5FA)", borderRadius: 10 }}></div>
+                </div>
+              </>
+            ) : uploadedFile ? (
+              <>
+                <div style={{ fontSize: 36, marginBottom: 10 }}>✅</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "#0B1F4B", marginBottom: 8 }}>
+                  {uploadedFile.type.startsWith("image/") ? "🖼️" : uploadedFile.name.endsWith(".txt") ? "📝" : "📄"} {uploadedFile.name}
+                </div>
+                <button onClick={triggerFileInput} style={{ background: "none", border: "1px solid #C7D2FE", borderRadius: 8, padding: "6px 16px", fontSize: 12, color: "#6B7280", cursor: "pointer", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+                  Changer de fichier
+                </button>
+              </>
+            ) : (
+              <>
+                <div style={{ fontSize: 36, marginBottom: 10 }}>📂</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "#0B1F4B", marginBottom: 6 }}>Déposez votre contrat</div>
+                <button
+                  onClick={triggerFileInput}
+                  style={{ background: "linear-gradient(135deg,#1D4ED8,#3B82F6)", color: "white", border: "none", padding: "11px 28px", borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Plus Jakarta Sans',sans-serif", marginBottom: 12 }}>
+                  📂 Choisir un fichier
+                </button>
+                <div style={{ fontSize: 12, color: "#9CA3AF", marginBottom: 4 }}>PDF · JPG · PNG · TXT</div>
+                <div style={{ fontSize: 11, color: "#C4BAA8" }}>
+                  📱 iPhone : Réglages → Appareil photo → Formats → "Le plus compatible" pour photos en JPG
+                </div>
+              </>
+            )}
+          </div>
 
           {uploadedFile && !uploading && (
             <div style={{ marginTop: 16, textAlign: "center" }}>
