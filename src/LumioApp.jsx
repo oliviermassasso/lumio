@@ -1167,7 +1167,7 @@ export default function Lumio() {
             <div style={{ position: "absolute", top: -20, right: -20, width: 100, height: 100, borderRadius: "50%", background: "rgba(255,255,255,0.04)", pointerEvents: "none" }}></div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
               <div>
-                <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, color: "rgba(255,255,255,0.45)", marginBottom: 3 }}>📊 Bilan Lumio</div>
+                <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, color: "rgba(255,255,255,0.75)", marginBottom: 3 }}>📊 Bilan Lumio</div>
                 <div style={{ fontSize: 18, fontWeight: 800, color: "white", letterSpacing: "-0.3px" }}>{analysis.type}</div>
                 <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginTop: 2 }}>{analysis.compagnie}</div>
               </div>
@@ -1215,8 +1215,28 @@ export default function Lumio() {
           </div>
 
           {analysis.conseil && (
-            <div style={{ background: "linear-gradient(135deg,#0B1F4B,#1E3A7B)", color: "white", borderRadius: 12, padding: "16px 18px", fontSize: 13, lineHeight: 1.65, marginBottom: 16, display: "flex", gap: 10, alignItems: "flex-start" }}>
-              <span style={{ fontSize: 18, flexShrink: 0 }}>💡</span><span>{analysis.conseil}</span>
+            <div style={{ background: "linear-gradient(135deg,#0B1F4B,#1E3A7B)", borderRadius: 12, padding: "18px 20px", marginBottom: 16, overflow: "hidden", position: "relative" }}>
+              <div style={{ position: "absolute", bottom: -15, right: -15, width: 70, height: 70, borderRadius: "50%", background: "rgba(255,255,255,0.04)", pointerEvents: "none" }}></div>
+              <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, color: "rgba(255,255,255,0.75)", marginBottom: 8 }}>💡 Conseil expert</div>
+              <div style={{ background: scoreBg, borderRadius: 8, padding: "12px 14px", fontSize: 13, color: scoreColor, lineHeight: 1.65, fontWeight: 500, border: `1px solid ${scoreBorder}`, marginBottom: 14 }}>
+                {analysis.conseil}
+              </div>
+              {!leadSent ? (
+                <button onClick={() => setStep("lead")} style={{
+                  width: "100%", padding: "12px 16px", borderRadius: 10,
+                  background: "rgba(255,255,255,0.15)", border: "1.5px solid rgba(255,255,255,0.4)",
+                  color: "white", fontFamily: "'Plus Jakarta Sans',sans-serif",
+                  fontSize: 13, fontWeight: 700, cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  transition: "all 0.2s",
+                }}>
+                  📞 Être rappelé gratuitement par un conseiller →
+                </button>
+              ) : (
+                <div style={{ background: "rgba(16,185,129,0.2)", borderRadius: 8, padding: "10px 14px", fontSize: 13, color: "#6EE7B7", fontWeight: 600, textAlign: "center" }}>
+                  ✅ Demande envoyée — un conseiller vous contactera sous 24h
+                </div>
+              )}
             </div>
           )}
 
