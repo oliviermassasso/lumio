@@ -268,125 +268,87 @@ const SPECIAL_CASES = [
 function buildDemoAnalysis(profile) {
   const isLOA = ["LOA / Leasing", "LLD (location longue durée)"].includes(profile.financement);
   const isRecent = ["Neuf ou < 1 an", "1 à 4 ans"].includes(profile.vehicule_age);
-  const hasChild = Array.isArray(profile.conducteurs) && profile.conducteurs.includes("Enfant(s)");
   const isChildMain = profile.conducteur_principal === "Mon enfant / l'autre conducteur";
   const isStreet = profile.stationnement === "Voie publique / rue";
-  const hasFreeText = profile.besoins_libres && profile.besoins_libres.length > 5;
   const isTournees = profile.usage === "Tournées";
   const isPro = profile.usage === "Privé + professionnel";
 
   const score = isLOA && profile.indemnisation_renforcee !== "Oui, elle est incluse" ? 2
-    : isChildMain ? 2
-    : isRecent ? 3 : 4;
+    : isChildMain ? 2 : isRecent ? 3 : 4;
 
-  const gaps = [];
+  const items = [];
 
-  if (isChildMain) gaps.push({
-    ok: false,
-    title: "⚠️ Risque de fausse déclaration conducteur",
-    detail: "Votre enfant est le conducteur principal réel mais est probablement déclaré secondaire. En cas de sinistre, l'assureur peut refuser totalement la prise en charge et résilier le contrat.",
-    tip: "Il faut impérativement régulariser la situation. Le surcoût est réel mais bien inférieur au risque d'être sans couverture."
+  if (isChildMain) items.push({
+    status: "ko", title: "Fausse déclaration conducteur — risque nullité",
+    detail: "Votre enfant est conducteur principal réel mais probablement déclaré secondaire. L'assureur peut refuser toute indemnisation et résilier le contrat.",
+    tip: "Régularisez immédiatement — le surcoût est bien inférieur au risque."
   });
 
-  if (isLOA && profile.indemnisation_renforcee !== "Oui, elle est incluse") gaps.push({
-    ok: false,
-    title: "Indemnisation renforcée absente — risque financier majeur",
-    detail: "En LOA/LLD, si votre véhicule est détruit, l'assureur rembourse la valeur vénale mais le loueur réclame le solde restant dû. Sans garantie renforcée, la différence est à votre charge.",
-    tip: "Cette option est quasi-indispensable en LOA/LLD. Son coût est faible comparé au risque réel."
+  if (isLOA && profile.indemnisation_renforcee !== "Oui, elle est incluse") items.push({
+    status: "ko", title: "LOA/LLD sans indemnisation renforcée — risque financier",
+    detail: "En cas de destruction totale, l'assureur rembourse la valeur vénale mais le loueur réclame le solde restant. La différence reste à votre charge.",
+    tip: "La garantie GAP est quasi-indispensable en LOA/LLD."
   });
 
-  if (isRecent && !isLOA) gaps.push({
-    ok: "warn",
-    title: "Valeur d'indemnisation à vérifier pour véhicule récent",
-    detail: "Sans option valeur à neuf, votre remboursement en cas de destruction totale sera la valeur du marché le jour du sinistre — souvent 20 à 40% de moins que votre prix d'achat.",
-    tip: "Pour un véhicule de moins de 4 ans, l'option valeur à neuf ou indemnisation majorée est fortement recommandée."
-  });
-
-  gaps.push({
-    ok: true,
-    title: "Niveau de couverture adapté à l'âge du véhicule",
-    detail: `Pour un véhicule ${profile.vehicule_age?.toLowerCase()}, le niveau de garantie de votre contrat actuel est cohérent avec la valeur du bien.`,
-    tip: null
-  });
-
-  if (isStreet) gaps.push({
-    ok: "warn",
-    title: "Stationnement voie publique — tarif et couverture à vérifier",
-    detail: "Le stationnement en rue génère un risque plus élevé (vol, vandalisme). Vérifiez que votre contrat est bien tarifé pour ce type de stationnement — une différence non déclarée peut poser problème.",
-    tip: "Si vous avez déménagé ou changé de type de stationnement, signalez-le immédiatement à votre assureur."
-  });
-
-  if (isTournees || isPro) gaps.push({
-    ok: false,
-    title: isTournees ? "Tournées professionnelles — vérification critique" : "Usage professionnel — vérification critique",
+  if (isTournees || isPro) items.push({
+    status: "ko",
+    title: isTournees ? "Tournées pro — vérification critique" : "Usage pro — à vérifier",
     detail: isTournees
-      ? "Un usage en tournées régulières mal déclaré est l'une des causes les plus fréquentes de refus de sinistre. Votre contrat doit explicitement mentionner cet usage."
-      : "Un usage professionnel mal déclaré peut entraîner un refus de sinistre. Votre contrat doit explicitement mentionner les déplacements professionnels.",
+      ? "Un usage en tournées mal déclaré est l'une des causes les plus fréquentes de refus de sinistre."
+      : "Un usage professionnel non mentionné au contrat peut entraîner un refus de sinistre.",
+    tip: "Vérifiez que votre contrat mentionne explicitement cet usage."
+  });
+
+  if (isRecent && !isLOA) items.push({
+    status: "warn", title: "Valeur d'indemnisation à vérifier",
+    detail: "Sans option valeur à neuf, le remboursement en cas de destruction totale sera la valeur marché — souvent 20-40% de moins que votre prix d'achat.",
+    tip: "Pour un véhicule récent, l'option valeur à neuf est fortement recommandée."
+  });
+
+  if (isStreet) items.push({
+    status: "warn", title: "Stationnement rue — vérifiez la déclaration",
+    detail: "Si vous avez changé de stationnement, signalez-le à votre assureur pour éviter tout problème en cas de sinistre.",
     tip: null
   });
 
-  gaps.push({
-    ok: profile.assistance_0km !== false ? "warn" : true,
-    title: "Assistance — vérifier la franchise kilométrique",
-    detail: "De nombreux contrats prévoient une franchise kilométrique (ex : pas d'assistance dans un rayon de 30 à 50 km du domicile). Si vous tombez en panne près de chez vous, vous n'êtes pas couvert.",
-    tip: "L'assistance 0 km est indispensable pour être tranquille en toutes circonstances. Vérifiez ce point dans votre contrat."
+  items.push({
+    status: "warn", title: "Assistance — franchise km à vérifier",
+    detail: "Nombreux contrats excluent l'assistance dans un rayon de 30-50 km du domicile. Vérifiez si vous bénéficiez de l'assistance 0km.",
+    tip: "L'assistance 0km est un point fort majeur — vérifiez ce point dans votre contrat."
   });
 
-  gaps.push({
-    ok: "warn",
-    title: "Véhicule de prêt — garantie ou simple service garage ?",
-    detail: "Beaucoup de contrats mentionnent un 'véhicule de remplacement' mais uniquement si vous passez par un garage partenaire, et seulement s'il en a un disponible. Ce n'est pas une vraie garantie.",
-    tip: "La vraie garantie véhicule de prêt vous assure un véhicule de location quoi qu'il arrive — panne, accident, vol, incendie."
+  items.push({
+    status: "warn", title: "Véhicule de remplacement — garantie ou service ?",
+    detail: "Beaucoup de contrats mentionnent un VR via garage partenaire seulement, sous condition de disponibilité. Ce n'est pas une vraie garantie.",
+    tip: "La vraie garantie VR vous assure un véhicule quoi qu'il arrive."
   });
 
-  if (hasFreeText) gaps.push({
-    ok: "warn",
-    title: "Point spécifique mentionné — à vérifier avec un expert",
-    detail: `Vous avez mentionné : "${profile.besoins_libres}". Ce point mérite une vérification approfondie avec un conseiller pour s'assurer que votre contrat y répond.`,
+  items.push({
+    status: "ok", title: "Responsabilité civile conforme",
+    detail: "Couverture RC obligatoire présente — vous êtes couvert pour les dommages causés aux tiers.",
+    tip: null
+  });
+
+  items.push({
+    status: "ok", title: "Niveau de couverture adapté à l'âge du véhicule",
+    detail: `Pour un véhicule ${profile.vehicule_age?.toLowerCase() || "de cet âge"}, le niveau de garantie est cohérent avec la valeur du bien.`,
     tip: null
   });
 
   return {
-    type: "Assurance Auto",
-    compagnie: "Votre contrat actuel",
-    score,
+    type: "Assurance Auto", compagnie: "Votre contrat actuel", score,
     resume: score <= 2
-      ? "Votre contrat présente des lacunes sérieuses au regard de votre situation réelle. Plusieurs points critiques nécessitent une action rapide pour éviter de mauvaises surprises en cas de sinistre."
+      ? "Votre contrat présente des lacunes sérieuses. Plusieurs points critiques nécessitent une action rapide."
       : score === 3
-      ? "Votre contrat offre une couverture correcte mais plusieurs points méritent d'être vérifiés ou optimisés selon votre profil."
-      : "Votre contrat est globalement bien adapté à votre situation. Quelques points d'attention à surveiller.",
-    garanties: [
-      "Responsabilité civile obligatoire",
-      profile.vehicule_age !== "Plus de 10 ans" ? "Dommages tous accidents" : null,
-      "Vol & incendie",
-      "Bris de glace",
-    ].filter(Boolean),
-    exclusions: [
-      isChildMain ? "Couverture compromise si fausse déclaration conducteur" : null,
-      isTournees ? "Tournées pro non confirmées dans le contrat" : isPro ? "Usage pro non confirmé dans le contrat" : null,
-      "Franchise kilométrique assistance probable",
-    ].filter(Boolean),
-    alertes: [
-      isLOA && profile.indemnisation_renforcee !== "Oui, elle est incluse" ? "Reliquat LOA/LLD non couvert en cas de destruction totale" : null,
-      isStreet ? "Stationnement rue — vérifier la déclaration" : null,
-      "Véhicule de prêt : garantie réelle à confirmer",
-      "Protection juridique : vérifier si c'est une vraie PJ ou simple assistance",
-    ].filter(Boolean),
-    points_forts: [
-      "Couverture accidents corporels présente",
-      "Couverture de base conforme",
-    ],
-    points_faibles: [
-      isLOA ? "Indemnisation insuffisante pour véhicule financé" : null,
-      "Assistance — franchise km à vérifier",
-      isRecent ? "Valeur d'indemnisation potentiellement insuffisante" : null,
-    ].filter(Boolean),
+      ? "Couverture correcte mais plusieurs points méritent d'être vérifiés ou optimisés."
+      : "Contrat globalement bien adapté. Quelques points d'attention à surveiller.",
+    items,
     conseil: score <= 2
-      ? "Votre situation nécessite une révision urgente. Contactez un conseiller expert pour régulariser ces points avant qu'un sinistre ne survienne."
-      : "Votre contrat est une bonne base mais peut être optimisé. Un conseiller peut vous proposer mieux au même prix ou moins cher.",
-    gaps,
+      ? "Votre situation nécessite une révision urgente. Si vous souhaitez qu'on vous aide, notre conseiller peut vous recontacter gratuitement et sans engagement."
+      : "Votre contrat est une bonne base. Si vous souhaitez qu'on l'optimise, notre conseiller peut vous recontacter gratuitement et sans engagement.",
   };
 }
+
 
 // ─── COMPOSANTS ───────────────────────────────────────────────────────────────
 function ScoreBadge({ score }) {
@@ -520,25 +482,21 @@ SOURCES TARIFAIRES : lelynx.fr, lesfurets.com, meilleurtaux.com — uniquement c
 - Ne jamais inventer ou supposer
 
 ═══ FORMAT JSON (CONCIS — MAX 8000 TOKENS) ═══
-Retourne UNIQUEMENT un JSON valide (sans markdown ni backticks) :
+Retourne UNIQUEMENT un JSON valide (sans markdown ni backticks).
+RÈGLE ANTI-DOUBLON : chaque sujet apparaît UNE SEULE FOIS dans items, dans la catégorie la plus grave : ko > warn > ok. Pas de répétition entre items.
 {
   "type": "type exact",
   "compagnie": "nom assureur",
   "score": 3,
   "resume": "2-3 phrases max",
-  "garanties": ["max 6 items, max 10 mots chacun"],
-  "exclusions": ["UNIQUEMENT lacunes critiques réelles — max 4 items courts"],
-  "alertes": ["max 5 items courts"],
-  "points_forts": ["max 5 items courts"],
-  "points_faibles": ["max 5 items courts"],
-  "conseil": "1-2 phrases avec rebond Lumio naturel",
-  "gaps": [
-    {"ok": true, "title": "court", "detail": "max 2 phrases", "tip": null},
-    {"ok": false, "title": "court", "detail": "max 2 phrases", "tip": "max 1 phrase"},
-    {"ok": "warn", "title": "court", "detail": "max 2 phrases", "tip": "max 1 phrase"}
-  ]
+  "items": [
+    {"status": "ok", "title": "5-7 mots max", "detail": "1-2 phrases", "tip": null},
+    {"status": "warn", "title": "5-7 mots max", "detail": "1-2 phrases", "tip": "1 phrase"},
+    {"status": "ko", "title": "5-7 mots max", "detail": "1-2 phrases", "tip": "1 phrase"}
+  ],
+  "conseil": "1-2 phrases avec rebond Lumio naturel"
 }
-MAX 12 gaps. JSON DOIT être complet et bien fermé.`;
+MAX 12 items. Triés : ok d'abord, warn ensuite, ko en dernier. JSON DOIT être complet et bien fermé.`;
 }
 
 // ─── APP ─────────────────────────────────────────────────────────────────────
@@ -1177,121 +1135,57 @@ export default function Lumio() {
 
   // ── RESULTS ───────────────────────────────────────────────────────────────
   if (step === "results" && analysis) {
+    const items = analysis.items || [];
+    const okCount = items.filter(i => i.status === "ok").length;
+    const warnCount = items.filter(i => i.status === "warn").length;
+    const koCount = items.filter(i => i.status === "ko").length;
+    const sorted = [...items].sort((a, b) => ({ ok: 0, warn: 1, ko: 2 }[a.status] - { ok: 0, warn: 1, ko: 2 }[b.status]));
     return (
       <div className="root"><style>{css}</style>
         <Nav back onBack={() => setStep("upload")} />
         <div className="section">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8, flexWrap: "wrap", gap: 12 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginTop: 4, marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
             <div>
               <div className="page-title">Votre bilan Lumio</div>
-              <div className="page-sub" style={{ marginBottom: 0 }}>Analyse personnalisée · Assurance Auto</div>
+              <div style={{ fontSize: 13, color: "#9CA3AF", marginTop: 2 }}>{analysis.type} · {analysis.compagnie}</div>
             </div>
-            <button className="btn-outline" onClick={() => { setStep("special_check"); setProfile({}); setAnalysis(null); }}>
-              Nouvelle analyse
-            </button>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: 72, height: 72, borderRadius: "50%", flexShrink: 0, background: analysis.score >= 4 ? "#ECFDF5" : analysis.score >= 3 ? "#FFF7ED" : "#FEF2F2", boxShadow: "0 4px 16px rgba(11,31,75,0.1)" }}>
+              <span style={{ fontSize: 24, fontWeight: 800, lineHeight: 1, color: analysis.score >= 4 ? "#065F46" : analysis.score >= 3 ? "#92400E" : "#991B1B" }}>{analysis.score}/5</span>
+              <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", marginTop: 2, color: analysis.score >= 4 ? "#065F46" : analysis.score >= 3 ? "#92400E" : "#991B1B" }}>{analysis.score >= 4 ? "Bon" : analysis.score >= 3 ? "Moyen" : "Insuffisant"}</span>
+            </div>
           </div>
-
-          <style>{`
-            @keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }
-            @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-          `}</style>
-
-          {/* ── BILAN CONTRAT ── */}
-          <div style={{ background: "white", borderRadius: 16, padding: "26px", border: "2px solid #E8EEFF", boxShadow: "0 4px 24px rgba(11,31,75,0.08)", marginBottom: 16, marginTop: 20 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18, flexWrap: "wrap", gap: 12 }}>
-              <div>
-                <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, color: "#3B82F6", marginBottom: 4 }}>📊 Bilan contrat</div>
-                <div style={{ fontSize: 21, fontWeight: 800, color: "#0B1F4B", letterSpacing: "-0.3px" }}>{analysis.type}</div>
-                <div style={{ fontSize: 13, color: "#9CA3AF", marginTop: 2 }}>{analysis.compagnie}</div>
-              </div>
-              <div style={{
-                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                width: 80, height: 80, borderRadius: "50%", flexShrink: 0,
-                background: analysis.score >= 4 ? "#ECFDF5" : analysis.score >= 3 ? "#FFF7ED" : "#FEF2F2",
-                boxShadow: "0 4px 16px rgba(11,31,75,0.1)",
-              }}>
-                <span style={{ fontSize: 26, fontWeight: 800, lineHeight: 1, color: analysis.score >= 4 ? "#065F46" : analysis.score >= 3 ? "#92400E" : "#991B1B" }}>{analysis.score}/5</span>
-                <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5, marginTop: 2, color: analysis.score >= 4 ? "#065F46" : analysis.score >= 3 ? "#92400E" : "#991B1B" }}>
-                  {analysis.score >= 4 ? "Bon" : analysis.score >= 3 ? "Moyen" : "Insuffisant"}
-                </span>
-              </div>
-            </div>
-            <div style={{ background: "#F4F7FF", borderRadius: 12, padding: "14px 18px", fontSize: 14, color: "#374151", lineHeight: 1.65, marginBottom: 20, borderLeft: "4px solid #3B82F6" }}>
-              {analysis.resume}
-            </div>
-            {[
-              { items: analysis.garanties, color: "#065F46", bg: "#ECFDF5", label: "✅ Garanties présentes", prefix: "✓" },
-              { items: analysis.exclusions, color: "#991B1B", bg: "#FEF2F2", label: "❌ Points critiques", prefix: "✕", border: "1px solid #FECACA" },
-              { items: analysis.alertes, color: "#92400E", bg: "#FFF7ED", label: "⚠️ Points d'attention", prefix: "⚠", border: "1px solid #FDE68A" },
-              { items: analysis.points_forts, color: "#1E40AF", bg: "#EFF6FF", label: "💪 Points forts", prefix: "+" },
-              { items: analysis.points_faibles, color: "#B45309", bg: "#FEF9C3", label: "📉 Points faibles", prefix: "−", border: "1px solid #FDE68A" },
-            ].filter(s => s.items?.length > 0).map((s, idx) => (
-              <div key={idx}>
-                <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.7, color: s.color, marginBottom: 8, marginTop: 18 }}>{s.label}</div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                  {s.items.map((item, j) => <span key={j} style={{ padding: "6px 13px", borderRadius: 8, fontSize: 12, fontWeight: 600, background: s.bg, color: s.color, border: s.border || "none" }}>{s.prefix} {item}</span>)}
-                </div>
-              </div>
-            ))}
-            {analysis.conseil && (
-              <div style={{ background: "linear-gradient(135deg,#0B1F4B,#1E3A7B)", color: "white", borderRadius: 12, padding: "16px 18px", fontSize: 13, lineHeight: 1.65, marginTop: 20, display: "flex", gap: 10, alignItems: "flex-start" }}>
-                <span style={{ fontSize: 18, flexShrink: 0 }}>💡</span><span>{analysis.conseil}</span>
-              </div>
-            )}
+          <div style={{ background: "#F4F7FF", borderRadius: 12, padding: "14px 18px", fontSize: 14, color: "#374151", lineHeight: 1.65, marginBottom: 16, borderLeft: "4px solid #3B82F6" }}>{analysis.resume}</div>
+          <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap", alignItems: "center" }}>
+            {[{ label: `✓ ${okCount} conforme${okCount>1?"s":""}`, bg: "#ECFDF5", color: "#065F46" },
+              { label: `⚠ ${warnCount} à vérifier`, bg: "#FFF7ED", color: "#92400E" },
+              { label: `✕ ${koCount} lacune${koCount>1?"s":""}`, bg: "#FEF2F2", color: "#991B1B" },
+            ].map((s, i) => <span key={i} style={{ padding: "5px 14px", borderRadius: 20, fontSize: 12, fontWeight: 700, background: s.bg, color: s.color }}>{s.label}</span>)}
+            <button className="btn-outline" style={{ marginLeft: "auto", padding: "5px 14px", fontSize: 12 }} onClick={() => { setStep("special_check"); setProfile({}); setAnalysis(null); }}>Nouvelle analyse</button>
           </div>
-
-          {/* ── SÉPARATEUR → ANALYSE PERSONNALISÉE ── */}
-          <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "8px 0 16px", position: "relative" }}>
-            <div style={{ flex: 1, height: 2, background: "linear-gradient(90deg, #E8EEFF, #C7D2FE)" }}></div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#FEF2F2", border: "1.5px solid #FECACA", borderRadius: 20, padding: "6px 14px", flexShrink: 0, position: "relative" }}>
-              {/* Point rouge clignotant */}
-              <div style={{ position: "relative", display: "inline-flex" }}>
-                <div style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#EF4444", animation: "ping 1.4s cubic-bezier(0,0,0.2,1) infinite", opacity: 0.55 }}></div>
-                <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#EF4444", position: "relative" }}></div>
-              </div>
-              <span style={{ fontSize: 12, fontWeight: 700, color: "#991B1B" }}>
-                {analysis.gaps.filter(g => g.ok === false).length} lacune{analysis.gaps.filter(g => g.ok === false).length > 1 ? "s" : ""} détectée{analysis.gaps.filter(g => g.ok === false).length > 1 ? "s" : ""} sur votre profil
-              </span>
-            </div>
-            <div style={{ flex: 1, height: 2, background: "linear-gradient(90deg, #C7D2FE, #E8EEFF)" }}></div>
-          </div>
-
-          {/* ── ANALYSE PERSONNALISÉE ── */}
           <div style={{ background: "white", borderRadius: 16, border: "2px solid #E8EEFF", boxShadow: "0 4px 24px rgba(11,31,75,0.08)", marginBottom: 16, overflow: "hidden" }}>
-            <div style={{ background: "linear-gradient(135deg,#0B1F4B,#1E3A7B)", color: "white", padding: "20px 26px" }}>
-              <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, color: "rgba(255,255,255,0.5)", marginBottom: 4 }}>🎯 Analyse personnalisée</div>
-              <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 6 }}>Ce que votre contrat ne couvre pas pour vous</div>
-              <div style={{ fontSize: 12, opacity: 0.65, marginBottom: 14 }}>
-                {Object.entries(profile).filter(([k,v]) => k !== "besoins_libres" && v).map(([,v]) => v).slice(0,3).join(" · ")}
-              </div>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                {[
-                  { label: `✓ ${analysis.gaps.filter(g => g.ok === true).length} conforme(s)`, bg: "rgba(16,185,129,0.2)", color: "#6EE7B7" },
-                  { label: `⚠ ${analysis.gaps.filter(g => g.ok === "warn").length} à vérifier`, bg: "rgba(245,158,11,0.2)", color: "#FCD34D" },
-                  { label: `✕ ${analysis.gaps.filter(g => g.ok === false).length} lacune(s)`, bg: "rgba(239,68,68,0.2)", color: "#FCA5A5" },
-                ].map((s, i) => <span key={i} style={{ padding: "4px 12px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: s.bg, color: s.color }}>{s.label}</span>)}
-              </div>
-            </div>
-            <div style={{ padding: "4px 26px 16px" }}>
-              {[...analysis.gaps]
-                .sort((a, b) => {
-                  const order = { true: 0, warn: 1, false: 2 };
-                  return order[a.ok] - order[b.ok];
-                })
-                .map((g, i) => (
-                <div key={i} style={{ display: "flex", gap: 14, padding: "15px 0", borderBottom: i < analysis.gaps.length - 1 ? "1px solid #F0F4FF" : "none" }}>
-                  <div style={{ width: 34, height: 34, borderRadius: 10, flexShrink: 0, marginTop: 2, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 800, background: g.ok === true ? "#ECFDF5" : g.ok === "warn" ? "#FFF7ED" : "#FEF2F2", color: g.ok === true ? "#065F46" : g.ok === "warn" ? "#92400E" : "#991B1B" }}>
-                    {g.ok === true ? "✓" : g.ok === "warn" ? "⚠" : "✕"}
-                  </div>
+            {sorted.map((item, i) => {
+              const cfg = item.status === "ok"
+                ? { bg: "#ECFDF5", color: "#065F46", icon: "✓", border: "#D1FAE5" }
+                : item.status === "warn"
+                ? { bg: "#FFF7ED", color: "#92400E", icon: "⚠", border: "#FDE68A" }
+                : { bg: "#FEF2F2", color: "#991B1B", icon: "✕", border: "#FECACA" };
+              return (
+                <div key={i} style={{ display: "flex", gap: 14, padding: "16px 20px", borderBottom: i < sorted.length-1 ? "1px solid #F4F7FF" : "none", background: item.status === "ko" ? "#FFFAFA" : "white" }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 10, flexShrink: 0, marginTop: 2, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 800, background: cfg.bg, color: cfg.color, border: `1.5px solid ${cfg.border}` }}>{cfg.icon}</div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: "#0B1F4B", marginBottom: 4 }}>{g.title}</div>
-                    <div style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.6 }}>{g.detail}</div>
-                    {g.tip && <div style={{ background: "#EFF6FF", borderLeft: "3px solid #3B82F6", borderRadius: "0 8px 8px 0", padding: "8px 12px", marginTop: 8, fontSize: 11, color: "#1D4ED8", lineHeight: 1.5, fontStyle: "italic" }}>👤 Conseil expert : {g.tip}</div>}
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "#0B1F4B", marginBottom: 4 }}>{item.title}</div>
+                    <div style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.6 }}>{item.detail}</div>
+                    {item.tip && <div style={{ background: "#EFF6FF", borderLeft: "3px solid #3B82F6", borderRadius: "0 8px 8px 0", padding: "7px 12px", marginTop: 8, fontSize: 12, color: "#1D4ED8", lineHeight: 1.5, fontStyle: "italic" }}>👤 {item.tip}</div>}
                   </div>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
+          {analysis.conseil && (
+            <div style={{ background: "linear-gradient(135deg,#0B1F4B,#1E3A7B)", color: "white", borderRadius: 12, padding: "16px 18px", fontSize: 13, lineHeight: 1.65, marginBottom: 16, display: "flex", gap: 10, alignItems: "flex-start" }}>
+              <span style={{ fontSize: 18, flexShrink: 0 }}>💡</span><span>{analysis.conseil}</span>
+            </div>
+          )}
 
           {/* ── DON — placé au pic d'émotion, juste après l'analyse ── */}
           {!donation || donation === "done" ? (
