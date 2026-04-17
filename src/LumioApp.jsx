@@ -449,11 +449,44 @@ FRANCHISE CONDUCTEUR NON DÉSIGNÉ — RÈGLE ABSOLUE :
 - NE JAMAIS conseiller de "vérifier que X n'utilise le véhicule qu'occasionnellement" si X est désigné — SAUF exception jeune conducteur ci-dessous.
 - Pas d'impact sur la note.
 
-JEUNE CONDUCTEUR — RÈGLE PRÉCISE :
-- Si jeune conducteur désigné secondaire au contrat mais confirmé conducteur principal réel (fait le plus de km) → ALERTE CRITIQUE : fausse déclaration du conducteur principal, risque de nullité et refus total de sinistre. L'alerte porte sur la déclaration du conducteur principal, PAS sur la franchise.
-- Si jeune conducteur présent mais PAS conducteur principal réel → POINT DE VIGILANCE uniquement, sans impact note.
-- Si situation non clairement établie → vigilance uniquement, jamais critique.
-- NE JAMAIS confondre l'alerte jeune conducteur (qui porte sur le conducteur principal) avec une alerte de franchise.
+JEUNE CONDUCTEUR — DÉFINITION : conducteur avec permis de moins de 3 ans, quel que soit l'âge.
+
+ARBRE DE DÉCISION COMPLET :
+
+CAS A — Client déclare un jeune conducteur ET il est nommément désigné au contrat :
+  → conducteur_principal = "Moi (le souscripteur)" :
+     Statut : ok (conforme)
+     Tip : "Situation conforme. Si un jour le jeune conducteur effectue plus de trajets que vous, mettez immédiatement à jour la déclaration du conducteur principal — une fausse déclaration, même involontaire, entraîne la nullité du contrat et le refus total d'indemnisation en cas de sinistre."
+  → conducteur_principal = "Mon enfant / l'autre conducteur" :
+     Statut : ko (critique)
+     Message : fausse déclaration conducteur principal — le jeune est le conducteur principal réel mais déclaré secondaire. Nullité du contrat + refus total de sinistre possible même sans faute.
+     Tip : "Régularisez immédiatement auprès de votre assureur. Le surcoût est réel mais sans commune mesure avec le risque d'être sans couverture en cas d'accident grave."
+  → conducteur_principal non renseigné :
+     Statut : warn
+     Message : vérifier qui fait réellement le plus de km — si c'est le jeune, régulariser immédiatement. Une fausse déclaration du conducteur principal peut entraîner la nullité du contrat.
+
+CAS B — Client déclare un jeune conducteur MAIS il n'apparaît PAS dans le contrat :
+  → conducteur_principal = "Moi (le souscripteur)" :
+     Statut : warn
+     Message : le jeune conducteur n'est pas déclaré au contrat. Conséquences : (1) franchise supplémentaire applicable si sinistre avec lui au volant. (2) le jeune ne cumule pas de bonus — chaque année sans sinistre non comptabilisée. Le déclarer au contrat supprime ces deux désavantages.
+  → conducteur_principal = "Mon enfant / l'autre conducteur" :
+     Statut : ko (double critique)
+     Message : double problème — (1) fausse déclaration conducteur principal : nullité + refus total de sinistre. (2) non déclaré au contrat : franchise supplémentaire + pas de cumul de bonus.
+     Tip : "Régularisation urgente : déclarez le jeune comme conducteur principal réel auprès de votre assureur."
+  → conducteur_principal non renseigné :
+     Statut : warn
+     Message : jeune conducteur non déclaré au contrat = franchise supplémentaire applicable + pas de cumul de bonus. Vérifier aussi qui fait réellement le plus de km — risque de fausse déclaration.
+
+CAS C — Client NE déclare PAS de jeune conducteur MAIS le contrat mentionne un conducteur avec permis récent (<3 ans) :
+  → Statut : warn discret
+  → Message : "Un conducteur récent a été détecté dans votre contrat. Si c'est lui qui effectue le plus de kilomètres annuels, il doit être déclaré conducteur principal — une fausse déclaration, même involontaire, peut entraîner la nullité du contrat."
+
+RÈGLES ABSOLUES jeune conducteur :
+- NE JAMAIS générer d'alerte critique si le souscripteur a confirmé être le conducteur principal
+- NE JAMAIS créer un item "majoration inconnue jeune conducteur" — pas une lacune contractuelle
+- NE JAMAIS confondre cette alerte avec une alerte de franchise
+- L'alerte porte TOUJOURS sur la déclaration du conducteur principal, jamais sur la franchise
+- Jeune déclaré au contrat = pas de franchise supplémentaire + cumul de bonus → point positif à mentionner
 
 FRANCHISES — GRILLE LUMIO (évaluation obligatoire) :
 Citadine 0-3ans: D 300-600€ | V/I 300-600€ | BDG 0-100€/100-250€
@@ -494,7 +527,7 @@ Exemples :
 INDEMNISATION : valeur à neuf 2 ans + expert+20% = BON niveau standard. Citer uniquement si écrit dans le contrat. VEI uniquement (pas sinistres partiels).
 ASSISTANCE : 0km = point fort majeur. Franchise km = point faible. Grille: excellente (24h/7j, 0km, VR 7-30j) / correcte (délais moyens, VR 3-7j) / faible (horaires limités, pas 0km).
 VR : Absent = point faible. Via garage partenaire seul = pas une garantie ferme.
-PJ : absente = signaler litiges + démarches + courriers. Recommander PJ générale séparée en priorité. Ne pas citer de prix.
+PJ : absente = signaler litiges + démarches + courriers + contestation expertise. Recommander PJ générale séparée en priorité (couvre auto + habitation + achats + vie privée). NE JAMAIS citer de prix ou tarif pour la PJ — ni "quelques euros", ni fourchette, ni montant annuel.
 BONUS-MALUS : plancher 0.50 après 14ans. Vol/incendie/BDG/CatNat = non impactants.
 GARANTIE CONDUCTEUR : <50k€ insuffisant | 50-200k€ correct | >300k€ bon. Famille+enfants: décès 500k€ minimum. Absent = critique.
 FRAIS ANNEXES : tous devraient être 0€. Frais présents = point très négatif.
