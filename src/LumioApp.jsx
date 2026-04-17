@@ -469,17 +469,27 @@ Haut de gamme/Sport 3-8ans: D 1000-2500€ | V/I 1200-3500€
 Électrique 3-8ans: D 600-1300€ | V/I 600-1300€
 CatNat: franchise légale 380€
 
-RÈGLES D'ÉVALUATION FRANCHISE — STRICTES :
-Calculer le tiers de la fourchette avant d'évaluer (ex: fourchette 400-700€ → tiers bas=400-500€, médian=500-600€, haut=600-700€)
-- Franchise dans le TIERS INFÉRIEUR → ok (point fort)
+RÈGLES D'ÉVALUATION FRANCHISE — STRICTES ET CALCULÉES :
+Avant toute évaluation, calculer les tiers de la fourchette :
+  tiers_bas = min + (max-min)*0.33
+  tiers_haut = min + (max-min)*0.67
+Exemples :
+  Électrique 0-3ans D 500-1200€ : tiers_bas=731€, tiers_haut=969€
+    → 570€ < 731€ = TIERS INFÉRIEUR = POINT FORT (ok)
+    → 800€ entre 731-969€ = TIERS MÉDIAN = NEUTRE, aucun item
+    → 1100€ > 969€ = TIERS SUPÉRIEUR = point d'attention (warn)
+  Citadine 3-8ans D 400-700€ : tiers_bas=499€, tiers_haut=601€
+    → 428€ < 499€ = TIERS INFÉRIEUR = POINT FORT (ok)
+- Franchise dans le TIERS INFÉRIEUR → ok, point fort
 - Franchise dans le TIERS MÉDIAN → neutre, aucun item à créer
-- Franchise dans le TIERS SUPÉRIEUR → warn (point d'attention mineur)
-- Franchise AU-DESSUS de la fourchette → warn (point faible)
-- Franchise TRÈS AU-DESSUS (+30% du plafond) → ko (lacune)
-- BDG 0€ réparation impact → ok (point fort systématique)
-- JAMAIS qualifier de "élevée" ou "inadaptée" une franchise dans la fourchette
+- Franchise dans le TIERS SUPÉRIEUR → warn, point d'attention mineur
+- Franchise AU-DESSUS du plafond → warn, point faible
+- Franchise TRÈS AU-DESSUS (+30% du plafond) → ko, lacune
+- BDG 0€ réparation impact → ok, point fort systématique
+- JAMAIS qualifier de "élevée", "haute" ou "optimisable" une franchise dans la fourchette
 - JAMAIS conseiller une franchise inférieure à 300€ — irréaliste
-- Pour véhicules à risque : appliquer les fourchettes majorées du tableau avant d'évaluer
+- JAMAIS suggérer de négocier une franchise déjà dans le tiers inférieur
+- Pour véhicules à risque : appliquer les fourchettes majorées avant d'évaluer
 
 INDEMNISATION : valeur à neuf 2 ans + expert+20% = BON niveau standard. Citer uniquement si écrit dans le contrat. VEI uniquement (pas sinistres partiels).
 ASSISTANCE : 0km = point fort majeur. Franchise km = point faible. Grille: excellente (24h/7j, 0km, VR 7-30j) / correcte (délais moyens, VR 3-7j) / faible (horaires limités, pas 0km).
