@@ -545,6 +545,25 @@ export default function Lumio() {
   const [uploadedFile, setUploadedFile] = useState(null);
   const fileInputRef = useRef(null);
 
+  const Footer = () => (
+    <div style={{ textAlign: "center", padding: "20px 24px 32px", fontSize: 11, color: "#9CA3AF", borderTop: "1px solid #E8EEFF", marginTop: 8 }}>
+      <div style={{ marginBottom: 6 }}>Lumio est un outil d'information. Pour toute décision d'assurance, consultez un professionnel agréé.</div>
+      <div style={{ display: "flex", justifyContent: "center", gap: 16, flexWrap: "wrap" }}>
+        <span>© 2025 Lumio · ORIAS 21 004 195</span>
+        <span
+          onClick={() => setStep("mentions")}
+          style={{ color: "#3B82F6", cursor: "pointer", textDecoration: "underline" }}>
+          Mentions légales
+        </span>
+        <span
+          onClick={() => setStep("confidentialite")}
+          style={{ color: "#3B82F6", cursor: "pointer", textDecoration: "underline" }}>
+          Confidentialité
+        </span>
+      </div>
+    </div>
+  );
+
   // Compute level-2 questions based on current profile
   const activeL2 = Q_LEVEL2_RULES.filter(r => r.condition(profile));
 
@@ -804,9 +823,7 @@ export default function Lumio() {
         </div>
       </div>
 
-      <div style={{ textAlign: "center", padding: "12px 24px 32px", fontSize: 11, color: "#9CA3AF" }}>
-        Lumio est un outil d'information. Pour toute décision d'assurance, consultez un professionnel agréé.
-      </div>
+      <Footer />
     </div>
   );
 
@@ -1152,7 +1169,11 @@ export default function Lumio() {
                   style={{ background: "linear-gradient(135deg,#1D4ED8,#3B82F6)", color: "white", border: "none", padding: "11px 28px", borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Plus Jakarta Sans',sans-serif", marginBottom: 12 }}>
                   📂 Choisir un fichier
                 </button>
-                <div style={{ fontSize: 12, color: "#9CA3AF", marginBottom: 4 }}>PDF · JPG · PNG · TXT</div>
+                <div style={{ fontSize: 12, color: "#9CA3AF", marginBottom: 6 }}>PDF · JPG · PNG · TXT</div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, background: "#ECFDF5", borderRadius: 8, padding: "7px 14px", marginBottom: 8 }}>
+                  <span style={{ fontSize: 12 }}>🔒</span>
+                  <span style={{ fontSize: 11, color: "#065F46", fontWeight: 600, lineHeight: 1.4 }}>Lu par l'IA uniquement — jamais stocké, jamais transmis, inaccessible à quiconque</span>
+                </div>
                 <div style={{ fontSize: 11, color: "#C4BAA8" }}>
                   📱 iPhone : Réglages → Appareil photo → Formats → "Le plus compatible" pour photos en JPG
                 </div>
@@ -1421,6 +1442,43 @@ export default function Lumio() {
 
   // ── LEAD FORM ─────────────────────────────────────────────────────────────
   if (step === "lead") {
+
+    const submitLead = async () => {
+      try {
+        const profileSummary = Object.entries(profile)
+          .filter(([k, v]) => v && (Array.isArray(v) ? v.length > 0 : true))
+          .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(", ") : v}`)
+          .join(" | ");
+
+        const lacunes = analysis?.items
+          ?.filter(i => i.status === "ko")
+          .map(i => i.title)
+          .join(", ") || "Aucune analyse effectuée";
+
+        await fetch("https://formspree.io/f/mnjldjya", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            nom: leadData.name,
+            email: leadData.email,
+            telephone: leadData.phone,
+            profil: profileSummary,
+            lacunes_detectees: lacunes,
+            score: analysis?.score ? `${analysis.score}/5` : "—",
+            contrat: analysis?.type || "—",
+            assureur: analysis?.compagnie || "—",
+            cas_particulier: specialCase || "Non",
+            source: "Lumio — lumio-flax.vercel.app",
+          })
+        });
+        setLeadSent(true);
+        setStep("results");
+      } catch (e) {
+        setLeadSent(true);
+        setStep("results");
+      }
+    };
+
     return (
       <div className="root"><style>{css}</style>
         <Nav back onBack={() => setStep(analysis ? "results" : "special_check")} />
@@ -1434,7 +1492,6 @@ export default function Lumio() {
                 💬 Le conseiller reçoit votre profil complet et les lacunes identifiées. Votre premier échange sera directement opérationnel — pas de répétitions, un vrai conseil adapté à vous.
               </div>
 
-              {/* Résumé profil transmis */}
               <div className="profile-tags" style={{ marginBottom: 18 }}>
                 <span className="ptag ptag-primary">🚗 Auto</span>
                 {Object.entries(profile).filter(([k, v]) => k !== "besoins_libres" && v).slice(0, 4).map(([k, v]) => (
@@ -1458,7 +1515,7 @@ export default function Lumio() {
 
               <button className="btn-primary" style={{ width: "100%", justifyContent: "center", marginTop: 4 }}
                 disabled={!leadData.name || !leadData.email || !leadData.phone}
-                onClick={() => { setLeadSent(true); setStep("results"); }}>
+                onClick={submitLead}>
                 Envoyer ma demande →
               </button>
               <div style={{ fontSize: 11, color: "#9CA3AF", textAlign: "center", marginTop: 8 }}>
@@ -1477,6 +1534,109 @@ export default function Lumio() {
       </div>
     );
   }
+
+  // ── MENTIONS LÉGALES ─────────────────────────────────────────────────────
+  if (step === "mentions") return (
+    <div className="root"><style>{css}</style>
+      <Nav back onBack={() => setStep("home")} />
+      <div className="section" style={{ maxWidth: 680 }}>
+        <div className="page-title">Mentions légales</div>
+
+        <div style={{ background: "white", borderRadius: 16, padding: 26, border: "1px solid #E8EEFF", boxShadow: "0 2px 12px rgba(11,31,75,0.06)", marginTop: 20 }}>
+          <h3 style={{ fontSize: 14, fontWeight: 700, color: "#0B1F4B", marginBottom: 8, marginTop: 0 }}>Éditeur du site</h3>
+          <p style={{ fontSize: 13, color: "#374151", lineHeight: 1.7, marginBottom: 16 }}>
+            Le site <strong>Lumio</strong> est édité par :<br />
+            <strong>Olivier Massasso</strong><br />
+            15 boulevard Gambetta, 06110 Le Cannet — France<br />
+            Immatriculé à l'ORIAS sous le numéro : <strong>21 004 195</strong><br />
+            Consultable sur <a href="https://www.orias.fr" target="_blank" style={{ color: "#3B82F6" }}>www.orias.fr</a>
+          </p>
+
+          <h3 style={{ fontSize: 14, fontWeight: 700, color: "#0B1F4B", marginBottom: 8 }}>Hébergement</h3>
+          <p style={{ fontSize: 13, color: "#374151", lineHeight: 1.7, marginBottom: 16 }}>
+            <strong>Vercel Inc.</strong> — 340 Pine Street, Suite 701, San Francisco, CA 94104, États-Unis
+          </p>
+
+          <h3 style={{ fontSize: 14, fontWeight: 700, color: "#0B1F4B", marginBottom: 8 }}>Activité réglementée</h3>
+          <p style={{ fontSize: 13, color: "#374151", lineHeight: 1.7, marginBottom: 16 }}>
+            Olivier Massasso est inscrit à l'ORIAS en qualité de :<br />
+            — <strong>Courtier en Assurance (COA)</strong><br />
+            — Agent Général d'Assurance (AGA)<br />
+            Numéro ORIAS : <strong>21 004 195</strong>
+          </p>
+          <p style={{ fontSize: 13, color: "#374151", lineHeight: 1.7, marginBottom: 16 }}>
+            Lumio est un outil d'information et d'aide à la compréhension des contrats d'assurance automobile. Il ne constitue pas un acte de souscription, de modification ou de résiliation de contrat d'assurance.
+          </p>
+
+          <h3 style={{ fontSize: 14, fontWeight: 700, color: "#0B1F4B", marginBottom: 8 }}>Limitation de responsabilité</h3>
+          <p style={{ fontSize: 13, color: "#374151", lineHeight: 1.7, marginBottom: 0 }}>
+            Les analyses produites par Lumio sont générées par intelligence artificielle à titre indicatif. Elles ne sauraient engager la responsabilité de l'éditeur en cas d'inexactitude ou d'omission. L'utilisateur est invité à vérifier toute information importante auprès de son assureur ou d'un conseiller professionnel.
+          </p>
+        </div>
+      </div>
+      <Footer />
+    </div>
+  );
+
+  // ── POLITIQUE DE CONFIDENTIALITÉ ─────────────────────────────────────────
+  if (step === "confidentialite") return (
+    <div className="root"><style>{css}</style>
+      <Nav back onBack={() => setStep("home")} />
+      <div className="section" style={{ maxWidth: 680 }}>
+        <div className="page-title">Confidentialité & Cookies</div>
+
+        {[
+          {
+            title: "Responsable du traitement",
+            content: "Olivier Massasso — 15 boulevard Gambetta, 06110 Le Cannet — ORIAS n° 21 004 195"
+          },
+          {
+            title: "Votre contrat — protégé",
+            content: null,
+            highlight: "✅ Votre contrat d'assurance (PDF, photo ou autre document) est traité directement dans votre navigateur. Il est transmis à l'IA uniquement pour générer votre analyse personnalisée. Il n'est jamais stocké, enregistré ni transmis à un tiers. Nous n'y avons pas accès.",
+            green: true
+          },
+          {
+            title: "Données collectées",
+            content: "Lors de l'utilisation du questionnaire, vous saisissez des informations relatives à votre véhicule et vos besoins. Ces données sont traitées localement dans votre navigateur et ne sont pas conservées sur nos serveurs.\n\nSi vous demandez à être contacté, nous collectons votre nom, email, téléphone et un résumé de votre profil, transmis via Formspree pour que notre conseiller vous réponde."
+          },
+          {
+            title: "Durée de conservation",
+            content: "Données de profil et contrat : non conservées — traitées en mémoire vive uniquement.\n\nDonnées de contact (leads) : conservées 3 ans à compter du dernier contact."
+          },
+          {
+            title: "Sous-traitants",
+            content: "Anthropic (Claude AI) — analyse IA des contrats — États-Unis\nVercel Inc. — hébergement — États-Unis\nFormspree — transmission des demandes de contact — États-Unis\n\nLes transferts vers les États-Unis sont encadrés par les mécanismes de protection appropriés (clauses contractuelles types)."
+          },
+          {
+            title: "Vos droits",
+            content: "Conformément au RGPD, vous disposez des droits d'accès, rectification, effacement, opposition et portabilité de vos données. Pour exercer ces droits, contactez-nous via le formulaire de contact du site."
+          },
+          {
+            title: "Cookies",
+            content: null,
+            highlight: "✅ Lumio n'utilise pas de cookies de tracking, de publicité ou d'analyse comportementale. Aucun bandeau de consentement n'est requis en l'état actuel du site.",
+            green: true
+          },
+        ].map((section, i) => (
+          <div key={i} style={{ background: "white", borderRadius: 16, padding: "20px 24px", border: "1px solid #E8EEFF", boxShadow: "0 2px 12px rgba(11,31,75,0.06)", marginTop: 12 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#0B1F4B", marginBottom: 10 }}>{section.title}</div>
+            {section.highlight && (
+              <div style={{ background: section.green ? "#ECFDF5" : "#EFF6FF", borderLeft: `3px solid ${section.green ? "#10B981" : "#3B82F6"}`, borderRadius: "0 8px 8px 0", padding: "10px 14px", fontSize: 13, color: section.green ? "#065F46" : "#1E40AF", lineHeight: 1.6 }}>
+                {section.highlight}
+              </div>
+            )}
+            {section.content && (
+              <p style={{ fontSize: 13, color: "#374151", lineHeight: 1.7, margin: 0, whiteSpace: "pre-line" }}>
+                {section.content}
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
+      <Footer />
+    </div>
+  );
 
   return null;
 }
