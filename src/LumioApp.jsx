@@ -475,7 +475,26 @@ VÉHICULE DE COLLECTION : ne pas analyser avec règles standard, inviter à cont
 REBOND COMMERCIAL : UN SEUL, dans le conseil final. Bienveillant, naturel. Jamais recommander un comparateur.
 SOURCES TARIFAIRES : lelynx.fr, lesfurets.com, meilleurtaux.com — uniquement comme données marché, jamais recommander au client.
 
-═══ RÈGLES ABSOLUES ═══
+KILOMÉTRAGE :
+- Forfait contractuel DÉPASSÉ par le km réel déclaré → ko : franchise imprévue ou pénalité sinistre
+- Km réel très faible vs forfait illimité → warn : conseil "Un forfait km adapté pourrait réduire votre cotisation"
+- Forfait cohérent avec usage réel → ok
+
+VÉHICULES À RISQUE — FRANCHISES MAJORÉES (intégrer à l'évaluation des franchises) :
+Pour ces catégories, les franchises majorées ci-dessous sont NORMALES — ne pas pénaliser si dans ces fourchettes :
+Sportives >250ch (Porsche 911/718/GT3, BMW M2-M5, AMG A45-E63, Audi RS3-RS6, Alpine A110, GT-R, GR Supra) : D +300-1500€ ou 5-10% | V +500-3000€
+SUV/berlines premium ciblées vol (Range Rover, BMW X5/X6/X7/S5/S7, Audi Q7/Q8/A6/A8, Mercedes GLE/GLS/S, Porsche Cayenne) : D +400-1200€ | V +700-2500€ | BDG +300-800€
+Top vols toutes gammes (Peugeot 3008/5008/208, Renault Clio/Captur, Dacia Duster, VW Golf/Polo/Tiguan, Nissan Qashqai) : V +300-1500€
+Cabriolets/toits souples (MX-5, Mini Cabrio, BMW Z4, Audi TT, Mercedes Cabrio, Porsche Boxster) : V +300-1200€ | D +200-600€
+Récents >50k€ neufs (BMW S5/S7/S8, Mercedes E/S/CLS, Audi A6/A7/A8, Porsche Panamera) : D +300-1000€ | BDG +150-400€ | V +500-1500€
+Électriques/hybrides premium (Tesla S/X, Porsche Taycan, Audi e-tron GT, Mercedes EQS/EQE, BMW i7/iX) : D +300-1200€ | BDG +300-700€ | V +500-2000€
+Imports/exotiques (Ford F-150, Dodge RAM, Corvette, Toyota Land Cruiser import, Supra MK4, RX-7) : D +300-1500€ | V +300-1000€
+Utilitaires légers pro (Kangoo/Trafic, Partner/Expert, Vito/Sprinter, VW Transporter) : D +200-600€ | V +500-2000€
+Collection/youngtimers recherchés (205 GTI, Clio Williams, Golf GTI Mk1-3, BMW M3 E30, Honda Civic Type R EP3) : V +500-2000€
+Luxe/supercars >80k€ (Ferrari, Lamborghini, McLaren, Aston Martin, Bentley, Rolls-Royce) : franchises en % 5-10% min 1000-3000€
+Vitrage/ADAS coûteux (Audi Q5/Q7/Q8 Matrix, Mercedes S/E/GLE, BMW X5/X7/S7, Tesla, Volvo XC60/XC90) : BDG remplacement +200-600€
+
+
 - Ne jamais citer garantie, plafond ou taux non écrit dans le contrat
 - Ne jamais mettre en critique : exclusions légales standard (alcool/stupéfiants, compétition, faute intentionnelle), franchises dans la fourchette
 - Ne jamais citer de prix sans certitude absolue
@@ -1135,37 +1154,55 @@ export default function Lumio() {
     const warnCount = items.filter(i => i.status === "warn").length;
     const koCount = items.filter(i => i.status === "ko").length;
     const sorted = [...items].sort((a, b) => ({ ok: 0, warn: 1, ko: 2 }[a.status] - { ok: 0, warn: 1, ko: 2 }[b.status]));
+    const scoreColor = analysis.score >= 4 ? "#065F46" : analysis.score >= 3 ? "#92400E" : "#991B1B";
+    const scoreBg = analysis.score >= 4 ? "#ECFDF5" : analysis.score >= 3 ? "#FFF7ED" : "#FEF2F2";
+    const scoreBorder = analysis.score >= 4 ? "#A7F3D0" : analysis.score >= 3 ? "#FDE68A" : "#FECACA";
     return (
       <div className="root"><style>{css}</style>
         <Nav back onBack={() => setStep("upload")} />
         <div className="section">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginTop: 4, marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
-            <div>
-              <div className="page-title">Votre bilan Lumio</div>
-              <div style={{ fontSize: 13, color: "#9CA3AF", marginTop: 2 }}>{analysis.type} · {analysis.compagnie}</div>
+
+          {/* EN-TÊTE BLEU MARINE avec compteurs */}
+          <div style={{ background: "linear-gradient(135deg,#0B1F4B,#1E3A7B)", borderRadius: 16, padding: "22px 24px", marginTop: 8, marginBottom: 16, overflow: "hidden", position: "relative" }}>
+            <div style={{ position: "absolute", top: -20, right: -20, width: 100, height: 100, borderRadius: "50%", background: "rgba(255,255,255,0.04)", pointerEvents: "none" }}></div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, color: "rgba(255,255,255,0.45)", marginBottom: 3 }}>📊 Bilan Lumio</div>
+                <div style={{ fontSize: 18, fontWeight: 800, color: "white", letterSpacing: "-0.3px" }}>{analysis.type}</div>
+                <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginTop: 2 }}>{analysis.compagnie}</div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: 68, height: 68, borderRadius: "50%", flexShrink: 0, background: scoreBg, border: `2px solid ${scoreBorder}`, boxShadow: "0 4px 16px rgba(0,0,0,0.2)" }}>
+                <span style={{ fontSize: 22, fontWeight: 800, lineHeight: 1, color: scoreColor }}>{analysis.score}/5</span>
+                <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", marginTop: 2, color: scoreColor }}>{analysis.score >= 4 ? "Bon" : analysis.score >= 3 ? "Moyen" : "Insuffisant"}</span>
+              </div>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: 72, height: 72, borderRadius: "50%", flexShrink: 0, background: analysis.score >= 4 ? "#ECFDF5" : analysis.score >= 3 ? "#FFF7ED" : "#FEF2F2", boxShadow: "0 4px 16px rgba(11,31,75,0.1)" }}>
-              <span style={{ fontSize: 24, fontWeight: 800, lineHeight: 1, color: analysis.score >= 4 ? "#065F46" : analysis.score >= 3 ? "#92400E" : "#991B1B" }}>{analysis.score}/5</span>
-              <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", marginTop: 2, color: analysis.score >= 4 ? "#065F46" : analysis.score >= 3 ? "#92400E" : "#991B1B" }}>{analysis.score >= 4 ? "Bon" : analysis.score >= 3 ? "Moyen" : "Insuffisant"}</span>
+
+            {/* RÉSUMÉ avec fond coloré selon score */}
+            <div style={{ background: scoreBg, borderRadius: 10, padding: "12px 16px", fontSize: 13, color: scoreColor, lineHeight: 1.65, marginBottom: 16, border: `1px solid ${scoreBorder}`, fontWeight: 500 }}>
+              {analysis.resume}
+            </div>
+
+            {/* COMPTEURS */}
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+              {[
+                { label: `✓ ${okCount} conforme${okCount>1?"s":""}`, bg: "rgba(16,185,129,0.2)", color: "#6EE7B7" },
+                { label: `⚠ ${warnCount} à vérifier`, bg: "rgba(245,158,11,0.2)", color: "#FCD34D" },
+                { label: `✕ ${koCount} lacune${koCount>1?"s":""}`, bg: "rgba(239,68,68,0.2)", color: "#FCA5A5" },
+              ].map((s, i) => <span key={i} style={{ padding: "5px 14px", borderRadius: 20, fontSize: 12, fontWeight: 700, background: s.bg, color: s.color }}>{s.label}</span>)}
+              <button className="btn-outline" style={{ marginLeft: "auto", padding: "5px 14px", fontSize: 11, background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.25)", color: "white" }} onClick={() => { setStep("special_check"); setProfile({}); setAnalysis(null); }}>Nouvelle analyse</button>
             </div>
           </div>
-          <div style={{ background: "#F4F7FF", borderRadius: 12, padding: "14px 18px", fontSize: 14, color: "#374151", lineHeight: 1.65, marginBottom: 16, borderLeft: "4px solid #3B82F6" }}>{analysis.resume}</div>
-          <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap", alignItems: "center" }}>
-            {[{ label: `✓ ${okCount} conforme${okCount>1?"s":""}`, bg: "#ECFDF5", color: "#065F46" },
-              { label: `⚠ ${warnCount} à vérifier`, bg: "#FFF7ED", color: "#92400E" },
-              { label: `✕ ${koCount} lacune${koCount>1?"s":""}`, bg: "#FEF2F2", color: "#991B1B" },
-            ].map((s, i) => <span key={i} style={{ padding: "5px 14px", borderRadius: 20, fontSize: 12, fontWeight: 700, background: s.bg, color: s.color }}>{s.label}</span>)}
-            <button className="btn-outline" style={{ marginLeft: "auto", padding: "5px 14px", fontSize: 12 }} onClick={() => { setStep("special_check"); setProfile({}); setAnalysis(null); }}>Nouvelle analyse</button>
-          </div>
+
+          {/* ITEMS UNIFIÉS */}
           <div style={{ background: "white", borderRadius: 16, border: "2px solid #E8EEFF", boxShadow: "0 4px 24px rgba(11,31,75,0.08)", marginBottom: 16, overflow: "hidden" }}>
             {sorted.map((item, i) => {
               const cfg = item.status === "ok"
-                ? { bg: "#ECFDF5", color: "#065F46", icon: "✓", border: "#D1FAE5" }
+                ? { bg: "#ECFDF5", color: "#065F46", icon: "✓", border: "#D1FAE5", rowBg: "white" }
                 : item.status === "warn"
-                ? { bg: "#FFF7ED", color: "#92400E", icon: "⚠", border: "#FDE68A" }
-                : { bg: "#FEF2F2", color: "#991B1B", icon: "✕", border: "#FECACA" };
+                ? { bg: "#FFF7ED", color: "#92400E", icon: "⚠", border: "#FDE68A", rowBg: "white" }
+                : { bg: "#FEF2F2", color: "#991B1B", icon: "✕", border: "#FECACA", rowBg: "#FFFAFA" };
               return (
-                <div key={i} style={{ display: "flex", gap: 14, padding: "16px 20px", borderBottom: i < sorted.length-1 ? "1px solid #F4F7FF" : "none", background: item.status === "ko" ? "#FFFAFA" : "white" }}>
+                <div key={i} style={{ display: "flex", gap: 14, padding: "16px 20px", borderBottom: i < sorted.length-1 ? "1px solid #F4F7FF" : "none", background: cfg.rowBg }}>
                   <div style={{ width: 32, height: 32, borderRadius: 10, flexShrink: 0, marginTop: 2, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 800, background: cfg.bg, color: cfg.color, border: `1.5px solid ${cfg.border}` }}>{cfg.icon}</div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 14, fontWeight: 700, color: "#0B1F4B", marginBottom: 4 }}>{item.title}</div>
@@ -1176,6 +1213,7 @@ export default function Lumio() {
               );
             })}
           </div>
+
           {analysis.conseil && (
             <div style={{ background: "linear-gradient(135deg,#0B1F4B,#1E3A7B)", color: "white", borderRadius: 12, padding: "16px 18px", fontSize: 13, lineHeight: 1.65, marginBottom: 16, display: "flex", gap: 10, alignItems: "flex-start" }}>
               <span style={{ fontSize: 18, flexShrink: 0 }}>💡</span><span>{analysis.conseil}</span>
