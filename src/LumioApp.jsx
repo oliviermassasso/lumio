@@ -451,14 +451,25 @@ Citadine 3-8ans: D 400-700€ | V/I 300-700€
 Citadine >8ans: D 500-800€ | V/I 400-800€
 Berline 0-3ans: D 400-800€ | V/I 400-800€ | BDG 0-100€/100-300€
 Berline 3-8ans: D 500-900€ | V/I 500-900€
-SUV 0-3ans: D 500-1000€ | V/I 500-1000€ | BDG 0-100€/150-400€
-SUV 3-8ans: D 600-1100€ | V/I 600-1100€
+SUV/Monospace 0-3ans: D 500-1000€ | V/I 500-1000€ | BDG 0-100€/150-400€
+SUV/Monospace 3-8ans: D 600-1100€ | V/I 600-1100€
 Haut de gamme/Sport 0-3ans: D 800-2000€ | V/I 1000-3000€ | BDG 100-250€/300-800€
 Haut de gamme/Sport 3-8ans: D 1000-2500€ | V/I 1200-3500€
 Électrique 0-3ans: D 500-1200€ | V/I 500-1200€ | BDG 0-100€/200-500€
 Électrique 3-8ans: D 600-1300€ | V/I 600-1300€
 CatNat: franchise légale 380€
-En bas de fourchette = point fort | Dans fourchette = neutre | Au-dessus = point faible | BDG 0€ = point fort | Jamais conseiller 0€ sur dommages
+
+RÈGLES D'ÉVALUATION FRANCHISE — STRICTES :
+Calculer le tiers de la fourchette avant d'évaluer (ex: fourchette 400-700€ → tiers bas=400-500€, médian=500-600€, haut=600-700€)
+- Franchise dans le TIERS INFÉRIEUR → ok (point fort)
+- Franchise dans le TIERS MÉDIAN → neutre, aucun item à créer
+- Franchise dans le TIERS SUPÉRIEUR → warn (point d'attention mineur)
+- Franchise AU-DESSUS de la fourchette → warn (point faible)
+- Franchise TRÈS AU-DESSUS (+30% du plafond) → ko (lacune)
+- BDG 0€ réparation impact → ok (point fort systématique)
+- JAMAIS qualifier de "élevée" ou "inadaptée" une franchise dans la fourchette
+- JAMAIS conseiller une franchise inférieure à 300€ — irréaliste
+- Pour véhicules à risque : appliquer les fourchettes majorées du tableau avant d'évaluer
 
 INDEMNISATION : valeur à neuf 2 ans + expert+20% = BON niveau standard. Citer uniquement si écrit dans le contrat. VEI uniquement (pas sinistres partiels).
 ASSISTANCE : 0km = point fort majeur. Franchise km = point faible. Grille: excellente (24h/7j, 0km, VR 7-30j) / correcte (délais moyens, VR 3-7j) / faible (horaires limités, pas 0km).
