@@ -1175,7 +1175,7 @@ export default function Lumio() {
                   <span style={{ fontSize: 11, color: "#065F46", fontWeight: 600, lineHeight: 1.4 }}>Lu par l'IA uniquement — jamais stocké, jamais transmis, inaccessible à quiconque</span>
                 </div>
                 <div style={{ fontSize: 11, color: "#C4BAA8" }}>
-                  📱 iPhone : Réglages → Appareil photo → Formats → "Le plus compatible" pour photos en JPG
+                  📱 Sur mobile, utilisez le scanner de votre téléphone pour créer un PDF multi-pages.
                 </div>
               </>
             )}
