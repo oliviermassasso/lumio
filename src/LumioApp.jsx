@@ -70,6 +70,10 @@ const css = `
   .dot-step { width: 7px; height: 7px; border-radius: 50%; transition: all 0.3s; }
 
   /* UPLOAD ZONE */
+  .tooltip-wrapper { display: inline-block; }
+  .tooltip-box { display: none; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: #0B1F4B; color: white; font-size: 12px; padding: 8px 12px; border-radius: 8px; width: 240px; z-index: 200; line-height: 1.5; box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+  .tooltip-box::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: #0B1F4B; }
+  .tooltip-wrapper:hover .tooltip-box { display: block; }
   .upload-zone { border: 2px dashed #C7D2FE; border-radius: 16px; padding: 44px 24px; text-align: center; background: white; transition: all 0.25s; }
   .upload-zone:hover { border-color: #3B82F6; background: #F0F7FF; }
 
@@ -165,24 +169,28 @@ const Q_LEVEL1 = [
   },
   {
     id: "financement",
-    why: "Le type de financement change tout en cas d'accident grave",
-    label: "Comment avez-vous financé votre véhicule ?",
+    why: "Le mode d'acquisition change tout en cas d'accident grave",
+    label: "Comment avez-vous acquis votre véhicule ?",
     type: "choice",
-    opts: ["Achat comptant", "Crédit auto", "LOA / Leasing", "LLD (location longue durée)"]
+    opts: ["Achat comptant", "Crédit auto", "LOA / Leasing", "LLD (location longue durée)", "Don / Héritage"]
   },
   {
     id: "conducteurs",
     why: "Pour vérifier que tous les conducteurs sont bien couverts",
     label: "Qui conduit ce véhicule ?",
-    type: "choice",
-    opts: ["Moi uniquement", "Moi + conjoint / proche", "J'ai un conducteur secondaire", "Mon enfant conduit aussi ce véhicule"]
+    type: "multi",
+    opts: ["Moi", "Conjoint", "Enfant(s)", "Autre(s) conducteur(s)"]
   },
   {
     id: "usage",
     why: "Un usage mal déclaré peut entraîner un refus de remboursement",
     label: "Comment utilisez-vous votre véhicule au quotidien ?",
     type: "choice",
-    opts: ["Usage privé uniquement", "Privé + trajets domicile-travail", "Privé + usage professionnel occasionnel", "Usage professionnel / tournées régulières"]
+    opts: ["Usage privé uniquement", "Privé + trajets domicile-travail", "Privé + professionnel", "Tournées"],
+    tooltips: {
+      "Privé + professionnel": "Utilisation de la voiture pendant le travail pour des déplacements liés à l'activité : rendez-vous clients, chantiers, visites, transport léger d'outillage.",
+      "Tournées": "Forme d'usage pro avec tournées régulières et de nombreux arrêts sur un secteur : livraisons, collectes, services à domicile, visites commerciales."
+    }
   },
   {
     id: "kilometrage",
@@ -196,7 +204,7 @@ const Q_LEVEL1 = [
 const Q_LEVEL2_RULES = [
   {
     id: "conducteur_principal",
-    condition: (p) => p.conducteurs === "Mon enfant conduit aussi ce véhicule",
+    condition: (p) => Array.isArray(p.conducteurs) ? p.conducteurs.includes("Enfant(s)") : false,
     why: "Point critique — une erreur ici peut invalider toute votre couverture",
     label: "Qui parcourt le plus de kilomètres au volant de ce véhicule sur l'année ?",
     type: "choice",
@@ -214,7 +222,7 @@ const Q_LEVEL2_RULES = [
   },
   {
     id: "valeur_achat",
-    condition: (p) => ["Neuf ou < 1 an", "1 à 4 ans"].includes(p.vehicule_age) && p.financement === "Achat comptant",
+    condition: (p) => ["Neuf ou < 1 an", "1 à 4 ans"].includes(p.vehicule_age) && ["Achat comptant", "Crédit auto", "Don / Héritage"].includes(p.financement),
     why: "Pour les véhicules récents, être remboursé à la valeur réelle fait une grande différence",
     label: "Souhaitez-vous être remboursé à la valeur d'achat en cas de destruction totale ?",
     type: "choice",
@@ -231,7 +239,7 @@ const Q_LEVEL2_RULES = [
   },
   {
     id: "pret_tiers",
-    condition: (p) => ["Moi + conjoint / proche", "J'ai un conducteur secondaire"].includes(p.conducteurs),
+    condition: (p) => Array.isArray(p.conducteurs) && p.conducteurs.some(c => ["Conjoint", "Autre(s) conducteur(s)"].includes(c)),
     why: "En cas de sinistre avec un conducteur non déclaré, des surprises peuvent apparaître",
     label: "Prêtez-vous votre véhicule à d'autres personnes de temps en temps ?",
     type: "choice",
@@ -260,10 +268,12 @@ const SPECIAL_CASES = [
 function buildDemoAnalysis(profile) {
   const isLOA = ["LOA / Leasing", "LLD (location longue durée)"].includes(profile.financement);
   const isRecent = ["Neuf ou < 1 an", "1 à 4 ans"].includes(profile.vehicule_age);
-  const hasChild = profile.conducteurs === "Mon enfant conduit aussi ce véhicule";
+  const hasChild = Array.isArray(profile.conducteurs) && profile.conducteurs.includes("Enfant(s)");
   const isChildMain = profile.conducteur_principal === "Mon enfant / l'autre conducteur";
   const isStreet = profile.stationnement === "Voie publique / rue";
   const hasFreeText = profile.besoins_libres && profile.besoins_libres.length > 5;
+  const isTournees = profile.usage === "Tournées";
+  const isPro = profile.usage === "Privé + professionnel";
 
   const score = isLOA && profile.indemnisation_renforcee !== "Oui, elle est incluse" ? 2
     : isChildMain ? 2
@@ -306,10 +316,12 @@ function buildDemoAnalysis(profile) {
     tip: "Si vous avez déménagé ou changé de type de stationnement, signalez-le immédiatement à votre assureur."
   });
 
-  if (profile.usage === "Usage professionnel / tournées régulières") gaps.push({
+  if (isTournees || isPro) gaps.push({
     ok: false,
-    title: "Usage professionnel — vérification critique",
-    detail: "Un usage professionnel mal déclaré est l'une des causes les plus fréquentes de refus de sinistre. Votre contrat doit explicitement mentionner cet usage.",
+    title: isTournees ? "Tournées professionnelles — vérification critique" : "Usage professionnel — vérification critique",
+    detail: isTournees
+      ? "Un usage en tournées régulières mal déclaré est l'une des causes les plus fréquentes de refus de sinistre. Votre contrat doit explicitement mentionner cet usage."
+      : "Un usage professionnel mal déclaré peut entraîner un refus de sinistre. Votre contrat doit explicitement mentionner les déplacements professionnels.",
     tip: null
   });
 
@@ -351,7 +363,7 @@ function buildDemoAnalysis(profile) {
     ].filter(Boolean),
     exclusions: [
       isChildMain ? "Couverture compromise si fausse déclaration conducteur" : null,
-      profile.usage === "Usage professionnel / tournées régulières" ? "Usage pro non confirmé dans le contrat" : null,
+      isTournees ? "Tournées pro non confirmées dans le contrat" : isPro ? "Usage pro non confirmé dans le contrat" : null,
       "Franchise kilométrique assistance probable",
     ].filter(Boolean),
     alertes: [
@@ -483,8 +495,17 @@ export default function Lumio() {
 
   const setAnswer = (id, val) => setProfile(p => ({ ...p, [id]: val }));
 
+  const toggleMultiAnswer = (id, val) => setProfile(p => {
+    const current = Array.isArray(p[id]) ? p[id] : [];
+    return { ...p, [id]: current.includes(val) ? current.filter(v => v !== val) : [...current, val] };
+  });
+
+  const profileDisplayValue = (val) => Array.isArray(val) ? val.join(", ") : val;
+
   const currentQ1 = Q_LEVEL1[q1Step];
-  const canNextQ1 = !!profile[currentQ1?.id];
+  const canNextQ1 = currentQ1?.type === "multi"
+    ? Array.isArray(profile[currentQ1.id]) && profile[currentQ1.id].length > 0
+    : !!profile[currentQ1?.id];
 
   // ── VRAIE ANALYSE PDF ─────────────────────────────────────────────────────
   const analyzeRealPDF = async (file) => {
@@ -499,7 +520,7 @@ export default function Lumio() {
       });
 
       const profileSummary = Object.entries(profile)
-        .filter(([k, v]) => v)
+        .filter(([k, v]) => v && (Array.isArray(v) ? v.length > 0 : true))
         .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(", ") : v}`)
         .join(" | ");
 
@@ -914,7 +935,7 @@ RÈGLES ABSOLUES DE CONTENU :
   const Nav = ({ back, onBack }) => (
     <div>
       <div className="nav">
-        <div className="nav-brand">
+        <div className="nav-brand" onClick={() => setStep("home")} style={{ cursor: "pointer" }}>
           {/* Logo : L doré + Lumio */}
           <div style={{
             width: 34, height: 34, borderRadius: 10,
@@ -963,7 +984,7 @@ RÈGLES ABSOLUES DE CONTENU :
         </div>
 
         <div className="hero-badge">🚗 Analyse contrat auto gratuite</div>
-        <div className="hero-title"><span>L'œil expert</span><br />sur vos assurances</div>
+        <div className="hero-title"><span>Faites la lumière</span><br />sur vos assurances</div>
         <div className="hero-sub">Lumio analyse votre contrat et détecte les lacunes selon votre situation réelle — gratuitement, sans parti pris.</div>
         <button className="btn-ghost" onClick={() => setStep("special_check")}>
           Analyser mon contrat gratuitement →
@@ -1044,12 +1065,14 @@ RÈGLES ABSOLUES DE CONTENU :
         )}
 
         <div style={{ display: "flex", gap: 12, marginTop: 20, flexWrap: "wrap" }}>
-          <button className="btn-primary" onClick={() => { setQ1Step(0); setStep("q1"); }}>
-            {specialCase ? "Continuer malgré tout →" : "Aucun de ces cas — Continuer →"}
-          </button>
+          {!specialCase && (
+            <button className="btn-primary" onClick={() => { setQ1Step(0); setStep("q1"); }}>
+              Aucun de ces cas — Continuer →
+            </button>
+          )}
           {specialCase && (
-            <button className="btn-outline" onClick={() => setStep("lead")}>
-              Parler directement à un expert
+            <button className="btn-ghost" style={{ background: "#1D4ED8", border: "none" }} onClick={() => setStep("lead")}>
+              Parler directement à un expert →
             </button>
           )}
         </div>
@@ -1071,11 +1094,40 @@ RÈGLES ABSOLUES DE CONTENU :
           <div className="q-card">
             <div className="q-why">💡 {q.why}</div>
             <div className="q-label">{q.label}</div>
-            <div className="q-opts">
-              {q.opts.map(o => (
-                <button key={o} className={`q-opt ${profile[q.id] === o ? "sel" : ""}`} onClick={() => setAnswer(q.id, o)}>{o}</button>
-              ))}
-            </div>
+            {q.type === "multi" ? (
+              <div className="q-opts">
+                {q.opts.map(o => {
+                  const selected = Array.isArray(profile[q.id]) && profile[q.id].includes(o);
+                  return (
+                    <button key={o} className={`q-opt ${selected ? "sel" : ""}`}
+                      onClick={() => toggleMultiAnswer(q.id, o)}>
+                      {selected ? "✓ " : ""}{o}
+                    </button>
+                  );
+                })}
+                {(!profile[q.id] || profile[q.id].length === 0) && (
+                  <div style={{ fontSize: 12, color: "#9CA3AF", marginTop: 8, fontStyle: "italic" }}>Sélectionnez une ou plusieurs options</div>
+                )}
+              </div>
+            ) : (
+              <div className="q-opts">
+                {q.opts.map(o => {
+                  const tooltip = q.tooltips?.[o];
+                  return (
+                    <div key={o} style={{ position: "relative" }} className="tooltip-wrapper">
+                      <button className={`q-opt ${profile[q.id] === o ? "sel" : ""}`}
+                        onClick={() => setAnswer(q.id, o)}>
+                        {o}
+                        {tooltip && <span style={{ marginLeft: 6, fontSize: 11, opacity: 0.6 }}>ⓘ</span>}
+                      </button>
+                      {tooltip && (
+                        <div className="tooltip-box">{tooltip}</div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Réponses déjà données */}
@@ -1083,7 +1135,7 @@ RÈGLES ABSOLUES DE CONTENU :
             <div className="profile-tags" style={{ marginBottom: 16 }}>
               {Q_LEVEL1.slice(0, q1Step).map(pq => profile[pq.id] && (
                 <span key={pq.id} className="ptag" style={{ cursor: "pointer" }} onClick={() => setQ1Step(Q_LEVEL1.findIndex(x => x.id === pq.id))}>
-                  {profile[pq.id]}
+                  {Array.isArray(profile[pq.id]) ? profile[pq.id].join(", ") : profile[pq.id]}
                 </span>
               ))}
             </div>
@@ -1247,7 +1299,7 @@ RÈGLES ABSOLUES DE CONTENU :
             <div className="profile-tags">
               <span className="ptag ptag-primary">🚗 Assurance Auto</span>
               {Object.entries(profile).filter(([k, v]) => k !== "besoins_libres" && v).map(([k, v]) => (
-                <span key={k} className="ptag">{v}</span>
+                <span key={k} className="ptag">{Array.isArray(v) ? v.join(", ") : v}</span>
               ))}
             </div>
           </div>
@@ -1276,7 +1328,7 @@ RÈGLES ABSOLUES DE CONTENU :
             <div style={{ fontSize: 11, fontWeight: 700, color: "#3B82F6", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>Profil enregistré</div>
             <div className="profile-tags">
               {Object.entries(profile).filter(([k, v]) => k !== "besoins_libres" && v).map(([k, v]) => (
-                <span key={k} className="ptag">{v}</span>
+                <span key={k} className="ptag">{Array.isArray(v) ? v.join(", ") : v}</span>
               ))}
             </div>
           </div>
@@ -1505,7 +1557,8 @@ RÈGLES ABSOLUES DE CONTENU :
                 <div style={{ fontSize: 11, color: "rgba(255,255,255,0.6)", marginTop: 5 }}>47 personnes ont soutenu Lumio ce mois-ci</div>
               </div>
 
-              {/* Montants — 5€ présélectionné */}
+              {/* Montants — avec hover scale */}
+              <style>{`.don-btn-amt:hover { transform: scale(1.08) !important; }`}</style>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
                 {[
                   { amount: "2€", label: "☕ Un café" },
@@ -1513,7 +1566,7 @@ RÈGLES ABSOLUES DE CONTENU :
                   { amount: "10€", label: "🎬 Un ciné" },
                   { amount: "20€", label: "🙏 Super fan" },
                 ].map(({ amount, label }) => (
-                  <button key={amount} onClick={() => setDonation(amount)} style={{
+                  <button key={amount} className="don-btn-amt" onClick={() => setDonation(amount)} style={{
                     flex: 1, minWidth: "fit-content",
                     padding: "10px 8px",
                     borderRadius: 12,
@@ -1533,6 +1586,26 @@ RÈGLES ABSOLUES DE CONTENU :
                     <div style={{ fontSize: 10, opacity: donation === amount ? 1 : 0.9, marginTop: 1 }}>{label}</div>
                   </button>
                 ))}
+                <button className="don-btn-amt" onClick={() => {
+                  const val = prompt("Entrez votre montant (ex: 15)");
+                  if (val && !isNaN(val) && Number(val) > 0) setDonation(`${Number(val)}€`);
+                }} style={{
+                  flex: 1, minWidth: "fit-content",
+                  padding: "10px 8px",
+                  borderRadius: 12,
+                  border: "2px solid rgba(255,255,255,0.65)",
+                  background: "rgba(255,255,255,0.22)",
+                  color: "white",
+                  fontFamily: "'Plus Jakarta Sans',sans-serif",
+                  fontWeight: 700,
+                  fontSize: 13,
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                  backdropFilter: "blur(4px)",
+                }}>
+                  <div style={{ fontSize: 15, fontWeight: 800 }}>✏️</div>
+                  <div style={{ fontSize: 10, opacity: 0.9, marginTop: 1 }}>Autre montant</div>
+                </button>
               </div>
 
               {donation && (
@@ -1609,7 +1682,7 @@ RÈGLES ABSOLUES DE CONTENU :
               <div className="profile-tags" style={{ marginBottom: 18 }}>
                 <span className="ptag ptag-primary">🚗 Auto</span>
                 {Object.entries(profile).filter(([k, v]) => k !== "besoins_libres" && v).slice(0, 4).map(([k, v]) => (
-                  <span key={k} className="ptag">{v}</span>
+                  <span key={k} className="ptag">{Array.isArray(v) ? v.join(", ") : v}</span>
                 ))}
                 {specialCase && <span className="ptag" style={{ background: "#FEF2F2", color: "#991B1B", borderColor: "#FECACA" }}>Cas particulier</span>}
               </div>
