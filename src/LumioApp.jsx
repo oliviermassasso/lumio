@@ -442,8 +442,18 @@ function buildPrompt(profileSummary) {
 ═══ RÈGLES MÉTIER ═══
 
 CONDUCTEUR PRINCIPAL : celui qui fait le plus de km/an. Fausse déclaration = nullité + refus sinistre.
-JEUNE CONDUCTEUR : alerte critique SEULEMENT si confirmé conducteur principal réel mais déclaré secondaire. Sinon vigilance simple sans impact note.
-FRANCHISE NON DÉSIGNÉ : s'applique UNIQUEMENT aux tiers non déclarés. Conjoint marié/pacsé et enfants en AAC = franchise normale sans désignation. Principe favorable par défaut. Pas d'impact note.
+FRANCHISE CONDUCTEUR NON DÉSIGNÉ — RÈGLE ABSOLUE :
+- Conducteur NOMMÉMENT désigné au contrat = même franchise que le souscripteur, AUCUNE franchise supplémentaire. NE JAMAIS générer d'alerte sur ce point.
+- Conjoint marié/pacsé et enfants en AAC = franchise normale par défaut même sans désignation nominative.
+- Franchise supplémentaire uniquement pour conducteur TOTALEMENT ABSENT du contrat.
+- NE JAMAIS conseiller de "vérifier que X n'utilise le véhicule qu'occasionnellement" si X est désigné — SAUF exception jeune conducteur ci-dessous.
+- Pas d'impact sur la note.
+
+JEUNE CONDUCTEUR — RÈGLE PRÉCISE :
+- Si jeune conducteur désigné secondaire au contrat mais confirmé conducteur principal réel (fait le plus de km) → ALERTE CRITIQUE : fausse déclaration du conducteur principal, risque de nullité et refus total de sinistre. L'alerte porte sur la déclaration du conducteur principal, PAS sur la franchise.
+- Si jeune conducteur présent mais PAS conducteur principal réel → POINT DE VIGILANCE uniquement, sans impact note.
+- Si situation non clairement établie → vigilance uniquement, jamais critique.
+- NE JAMAIS confondre l'alerte jeune conducteur (qui porte sur le conducteur principal) avec une alerte de franchise.
 
 FRANCHISES — GRILLE LUMIO (évaluation obligatoire) :
 Citadine 0-3ans: D 300-600€ | V/I 300-600€ | BDG 0-100€/100-250€
